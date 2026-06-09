@@ -6,7 +6,7 @@
 DROP TABLE IF EXISTS kpi_data CASCADE;
 DROP TABLE IF EXISTS profiles CASCADE;
 DROP FUNCTION IF EXISTS public.check_employee(TEXT, TEXT);
-DROP FUNCTION IF EXISTS public.handle_new_user();
+DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
 
 -- Step 2: Create kpi_data table
 CREATE TABLE kpi_data (
