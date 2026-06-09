@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KPI\u85aa\u916c\u67e5\u8be2\u7cfb\u7edf</title>
+<title>KPI薪酬查询系统</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -52,32 +52,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 .logout-btn:hover{border-color:#ff6b6b;color:#ff6b6b}
 .top-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px}
 .hidden{display:none!important}
-.debug{position:fixed;bottom:10px;left:10px;right:10px;background:rgba(0,0,0,.8);color:#0f0;font-size:11px;padding:10px;border-radius:8px;max-height:200px;overflow:auto;z-index:999;word-break:break-all}
+.debug{position:fixed;bottom:10px;left:10px;right:10px;background:rgba(0,0,0,.85);color:#0f0;font-size:11px;padding:10px;border-radius:8px;max-height:200px;overflow:auto;z-index:999;word-break:break-all;white-space:pre-wrap}
 </style>
 </head>
 <body>
 <div class="container">
   <div class="header">
-    <h1>KPI\u85aa\u916c\u67e5\u8be2\u7cfb\u7edf</h1>
-    <p>\u4e2d\u56fd\u7535\u4fe1\u4e50\u5c71\u5206\u516c\u53f8 \u00b7 \u7f51\u683c\u7ecf\u7406</p>
+    <h1 id="title1"></h1>
+    <p id="subtitle1"></p>
   </div>
   <div id="authView">
     <div class="card">
       <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchAuth('login',this)">登录</button>
-        <button class="auth-tab" onclick="switchAuth('register',this)">注册</button>
+        <button class="auth-tab active" onclick="switchAuth('login',this)" id="tabLogin"></button>
+        <button class="auth-tab" onclick="switchAuth('register',this)" id="tabReg"></button>
       </div>
       <div class="auth-form" id="loginForm">
-        <div class="form-group"><label>工号</label><input id="lId" placeholder="请输入工号"></div>
-        <div class="form-group"><label>密码</label><input id="lPwd" type="password" placeholder="请输入密码"></div>
-        <button class="btn" onclick="login()">登录查询</button>
+        <div class="form-group"><label id="lbl1"></label><input id="lId" placeholder=""></div>
+        <div class="form-group"><label id="lbl2"></label><input id="lPwd" type="password" placeholder=""></div>
+        <button class="btn" onclick="login()" id="btnLogin"></button>
         <div class="error" id="lErr"></div>
       </div>
       <div class="auth-form hidden" id="regForm">
-        <div class="form-group"><label>工号</label><input id="rId" placeholder="请输入工号"></div>
-        <div class="form-group"><label>姓名</label><input id="rName" placeholder="请输入姓名（需与系统一致）"></div>
-        <div class="form-group"><label>密码</label><input id="rPwd" type="password" placeholder="设置密码（至少6位）"></div>
-        <button class="btn" onclick="register()">注册账号</button>
+        <div class="form-group"><label id="lbl3"></label><input id="rId" placeholder=""></div>
+        <div class="form-group"><label id="lbl4"></label><input id="rName" placeholder=""></div>
+        <div class="form-group"><label id="lbl5"></label><input id="rPwd" type="password" placeholder=""></div>
+        <button class="btn" onclick="register()" id="btnReg"></button>
         <div class="error" id="rErr"></div>
       </div>
     </div>
@@ -87,256 +87,293 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
 <div class="debug" id="dbg"></div>
 
 <script>
-const SB_URL='https://fqrlmdqnoaxtqwvxmedo.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxcmxtZHFub2F4dHF3dnhtZWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5Njk4ODIsImV4cCI6MjA5NjU0NTg4Mn0.V_gds7P0YIf3SJ3ikWjM4HcSXkjIuBy9WDvUxge2rso';
-let sb;
-try{sb=supabase.createClient(SB_URL,SB_KEY);dbg('Supabase client OK')}catch(e){dbg('Client error: '+e.message)}
+// All Chinese text in JS to avoid encoding issues
+var T = {
+  title: 'KPI薪酬查询系统',
+  subtitle: '中国电信乐山分公司 · 网格经理',
+  login: '登录', register: '注册',
+  empId: '工号', empName: '姓名', password: '密码',
+  phEmpId: '请输入工号', phPwd: '请输入密码',
+  phRegName: '请输入姓名（需与系统一致）',
+  phRegPwd: '设置密码（至少6位）',
+  btnLogin: '登录查询', btnReg: '注册账号',
+  errFill: '请填写所有字段', errPwdLen: '密码至少6位',
+  errMatch: '工号或姓名与系统记录不匹配',
+  errExist: '该工号已注册，请直接登录',
+  regOk: '注册成功！请切换到登录页面',
+  errLogin: '工号或密码错误', errLoginFail: '登录失败',
+  loading: '加载KPI数据中...',
+  noData: '未找到KPI数据', loadFail: '加载失败',
+  logout: '退出登录',
+  noProfile: '未找到档案',
+  scores: '维度得分', details: '业务明细', compare: '团队对比',
+  scoreDetail: '得分明细', advantageWeakness: '优势与短板',
+  adv: '优势: ', weak: '短板: ',
+  teamCompare: '与团队平均值对比',
+  teamAvg: '团队均值: ',
+  kpiTotal: 'KPI总得分', deviation: '距上线偏差: ',
+  rank: '第', name: '名',
+  noSession: '无会话'
+};
 
-function dbg(m){document.getElementById('dbg').innerHTML+='<div>'+m+'</div>';console.log(m)}
-function switchAuth(t,el){
-  document.querySelectorAll('.auth-tab').forEach(e=>e.classList.remove('active'));
+// Fill in all Chinese text
+document.getElementById('title1').textContent = T.title;
+document.getElementById('subtitle1').textContent = T.subtitle;
+document.getElementById('tabLogin').textContent = T.login;
+document.getElementById('tabReg').textContent = T.register;
+document.getElementById('lbl1').textContent = T.empId;
+document.getElementById('lbl2').textContent = T.password;
+document.getElementById('lbl3').textContent = T.empId;
+document.getElementById('lbl4').textContent = T.empName;
+document.getElementById('lbl5').textContent = T.password;
+document.getElementById('lId').placeholder = T.phEmpId;
+document.getElementById('lPwd').placeholder = T.phPwd;
+document.getElementById('rId').placeholder = T.phEmpId;
+document.getElementById('rName').placeholder = T.phRegName;
+document.getElementById('rPwd').placeholder = T.phRegPwd;
+document.getElementById('btnLogin').textContent = T.btnLogin;
+document.getElementById('btnReg').textContent = T.btnReg;
+
+const SB_URL = 'https://fqrlmdqnoaxtqwvxmedo.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxcmxtZHFub2F4dHF3dnhtZWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5Njk4ODIsImV4cCI6MjA5NjU0NTg4Mn0.V_gds7P0YIf3SJ3ikWjM4HcSXkjIuBy9WDvUxge2rso';
+let sb;
+try { sb = supabase.createClient(SB_URL, SB_KEY); dbg('Supabase client OK'); } catch(e) { dbg('Client error: ' + e.message); }
+
+function dbg(m) { document.getElementById('dbg').innerHTML += m + '\n'; console.log(m); }
+
+function switchAuth(t, el) {
+  document.querySelectorAll('.auth-tab').forEach(e => e.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('loginForm').classList.toggle('hidden',t!=='login');
-  document.getElementById('regForm').classList.toggle('hidden',t!=='register');
-  document.getElementById('lErr').textContent='';
-  document.getElementById('rErr').textContent='';
+  document.getElementById('loginForm').classList.toggle('hidden', t !== 'login');
+  document.getElementById('regForm').classList.toggle('hidden', t !== 'register');
+  document.getElementById('lErr').textContent = '';
+  document.getElementById('rErr').textContent = '';
 }
 
-async function register(){
-  const eid=document.getElementById('rId').value.trim();
-  const ename=document.getElementById('rName').value.trim();
-  const pwd=document.getElementById('rPwd').value;
-  const err=document.getElementById('rErr');
-  err.textContent='';
-  if(!eid||!ename||!pwd){err.textContent='请填写所有字段';return}
-  if(pwd.length<6){err.textContent='密码至少6位';return}
-  try{
-    dbg('Checking employee: '+eid+' / '+ename);
-    const{data:ok,error:ce}=await sb.rpc('check_employee',{eid:eid,ename:ename});
-    dbg('check_employee result: '+(ok)+' err:'+JSON.stringify(ce));
-    if(ce||!ok){err.textContent='工号或姓名与系统记录不匹配';return}
-    const email=eid+'@kpi.local';
-    dbg('Signing up: '+email);
-    const{data,error}=await sb.auth.signUp({email,password:pwd,options:{data:{emp_id:eid,emp_name:ename}}});
-    if(error){
-      dbg('SignUp error: '+error.message);
-      if(error.message.includes('already'))err.textContent='该工号已注册，请直接登录';
-      else err.textContent=error.message;
+async function register() {
+  var eid = document.getElementById('rId').value.trim();
+  var ename = document.getElementById('rName').value.trim();
+  var pwd = document.getElementById('rPwd').value;
+  var err = document.getElementById('rErr');
+  err.textContent = '';
+  if (!eid || !ename || !pwd) { err.textContent = T.errFill; return; }
+  if (pwd.length < 6) { err.textContent = T.errPwdLen; return; }
+  try {
+    dbg('Checking employee: ' + eid + ' / ' + ename);
+    var res = await sb.rpc('check_employee', { eid: eid, ename: ename });
+    dbg('check_employee: ' + JSON.stringify(res));
+    if (res.error || !res.data) { err.textContent = T.errMatch; return; }
+    var email = eid + '@kpi.local';
+    dbg('Signing up: ' + email);
+    var res2 = await sb.auth.signUp({ email: email, password: pwd, options: { data: { emp_id: eid, emp_name: ename } } });
+    if (res2.error) {
+      dbg('SignUp error: ' + res2.error.message);
+      if (res2.error.message.indexOf('already') !== -1) err.textContent = T.errExist;
+      else err.textContent = res2.error.message;
       return;
     }
-    dbg('SignUp success');
-    err.className='success';err.textContent='注册成功！请切换到登录页面';
-  }catch(e){dbg('Register exception: '+e.message);err.textContent='注册失败: '+e.message}
+    dbg('SignUp OK');
+    err.className = 'success';
+    err.textContent = T.regOk;
+  } catch(e) { dbg('Register exception: ' + e.message); err.textContent = T.errLoginFail + ': ' + e.message; }
 }
 
-async function login(){
-  const eid=document.getElementById('lId').value.trim();
-  const pwd=document.getElementById('lPwd').value;
-  const err=document.getElementById('lErr');
-  err.textContent='';
-  if(!eid||!pwd){err.textContent='请输入工号和密码';return}
-  try{
-    const email=eid+'@kpi.local';
-    dbg('Signing in: '+email);
-    const{data,error}=await sb.auth.signInWithPassword({email,password:pwd});
-    if(error){dbg('Login error: '+error.message);err.textContent='工号或密码错误';return}
-    dbg('Login success, uid='+data.user.id);
+async function login() {
+  var eid = document.getElementById('lId').value.trim();
+  var pwd = document.getElementById('lPwd').value;
+  var err = document.getElementById('lErr');
+  err.textContent = '';
+  if (!eid || !pwd) { err.textContent = T.errFill; return; }
+  try {
+    var email = eid + '@kpi.local';
+    dbg('Signing in: ' + email);
+    var res = await sb.auth.signInWithPassword({ email: email, password: pwd });
+    if (res.error) { dbg('Login error: ' + res.error.message); err.textContent = T.errLogin; return; }
+    dbg('Login OK, uid=' + res.data.user.id);
     await loadKPI();
-  }catch(e){dbg('Login exception: '+e.message);err.textContent='登录失败: '+e.message}
+  } catch(e) { dbg('Login exception: ' + e.message); err.textContent = T.errLoginFail + ': ' + e.message; }
 }
 
-async function doLogout(){
+async function doLogout() {
   await sb.auth.signOut();
   document.getElementById('authView').classList.remove('hidden');
   document.getElementById('kpiView').classList.add('hidden');
-  document.getElementById('lPwd').value='';
+  document.getElementById('lPwd').value = '';
 }
 
-async function loadKPI(){
-  const kv=document.getElementById('kpiView');
+async function loadKPI() {
+  var kv = document.getElementById('kpiView');
   kv.classList.remove('hidden');
   document.getElementById('authView').classList.add('hidden');
-  kv.innerHTML='<div class="card"><div style="text-align:center;padding:40px;color:#8892b0">加载KPI数据中...</div></div>';
-
-  try{
-    // Step 1: Get profile
+  kv.innerHTML = '<div class="card"><div style="text-align:center;padding:40px;color:#8892b0">' + T.loading + '</div></div>';
+  try {
     dbg('Querying profiles...');
-    const{data:prof,error:pe}=await sb.from('profiles').select('*').single();
-    dbg('Profile: '+JSON.stringify(prof)+' err: '+JSON.stringify(pe));
-    if(!prof){dbg('No profile found, logging out');doLogout();return}
+    var res1 = await sb.from('profiles').select('*').single();
+    dbg('Profile result: ' + JSON.stringify(res1));
+    if (!res1.data) { dbg(T.noProfile); doLogout(); return; }
+    var prof = res1.data;
 
-    // Step 2: Get KPI data
-    // We need to find the correct column name for 工号
-    // Try querying without filter first to see columns (RLS should limit to own row)
     dbg('Querying kpi_data...');
-    const{data:kpiData,error:ke}=await sb.from('kpi_data').select('*');
-    dbg('KPI data: '+(kpiData?kpiData.length+' rows':'null')+' err: '+JSON.stringify(ke));
-
-    if(ke||!kpiData||kpiData.length===0){
-      kv.innerHTML='<div class="card"><div class="error" style="padding:40px">未找到KPI数据 (error: '+JSON.stringify(ke)+')</div></div>';
+    var res2 = await sb.from('kpi_data').select('*');
+    dbg('KPI result count: ' + (res2.data ? res2.data.length : 'null') + ' err: ' + JSON.stringify(res2.error));
+    if (res2.error || !res2.data || res2.data.length === 0) {
+      kv.innerHTML = '<div class="card"><div class="error" style="padding:40px">' + T.noData + ': ' + JSON.stringify(res2.error) + '</div></div>';
       return;
     }
-
-    const d=kpiData[0];
-    const keys=Object.keys(d);
-    dbg('KPI keys: '+JSON.stringify(keys));
-
-    // Render
-    render(d,keys,prof);
-
-  }catch(e){
-    dbg('loadKPI exception: '+e.message+' '+e.stack);
-    kv.innerHTML='<div class="card"><div class="error" style="padding:40px">加载失败: '+e.message+'</div></div>';
+    render(res2.data[0], prof);
+  } catch(e) {
+    dbg('loadKPI exception: ' + e.message);
+    kv.innerHTML = '<div class="card"><div class="error" style="padding:40px">' + T.loadFail + ': ' + e.message + '</div></div>';
   }
 }
 
-function render(d,keys,prof){
-  const kv=document.getElementById('kpiView');
-  const cols=keys.filter(k=>k!=='id'&&k!=='created_at');
+function render(d, prof) {
+  var kv = document.getElementById('kpiView');
+  var keys = Object.keys(d);
+  var cols = keys.filter(function(k) { return k !== 'id' && k !== 'created_at'; });
 
-  // Identify columns by position (known from data structure)
-  // cols[0]=工号, cols[1]=姓名, cols[2]=星级, cols[3]=区县, cols[4]=业务状态
-  // Then score fields, then team avg fields, then array fields (优势,短板)
-  let html='';
+  dbg('All columns: ' + JSON.stringify(cols));
+  dbg('First 4 cols: ' + cols[0] + ' | ' + cols[1] + ' | ' + cols[2] + ' | ' + cols[3]);
+
+  var html = '';
 
   // Top bar
-  html+='<div class="card top-bar"><span style="font-size:14px;color:#8892b0">'+prof.emp_name+'</span>';
-  html+='<button class="logout-btn" onclick="doLogout()">退出登录</button></div>';
+  html += '<div class="card top-bar"><span style="font-size:14px;color:#8892b0">' + prof.emp_name + '</span>';
+  html += '<button class="logout-btn" onclick="doLogout()">' + T.logout + '</button></div>';
 
   // Main card
-  html+='<div class="card">';
+  html += '<div class="card">';
 
-  // Name and rank
-  const empName=d[cols[1]]||'-';
-  const star=d[cols[2]]||'-';
-  const district=d[cols[3]]||'-';
+  var empName = d[cols[1]] || '-';
+  var star = d[cols[2]] || '-';
+  var district = d[cols[3]] || '-';
 
-  // Find ranking (integer between 1-37)
-  let rankVal=null;
-  cols.forEach(k=>{const v=d[k];if(typeof v==='number'&&v>=1&&v<=37&&v===Math.floor(v))rankVal=v});
+  // Find ranking
+  var rankVal = null;
+  cols.forEach(function(k) { var v = d[k]; if (typeof v === 'number' && v >= 1 && v <= 37 && v === Math.floor(v)) rankVal = v; });
 
-  html+='<div class="kpi-header"><div>';
-  html+='<div class="kpi-name">'+empName+'</div>';
-  html+='<div style="font-size:13px;color:#8892b0;margin-top:4px">'+district+' \u00b7 '+star+'</div>';
-  html+='</div>';
-  html+='<div class="kpi-badge">'+(rankVal?'第'+rankVal+'名':'')+'</div></div>';
+  html += '<div class="kpi-header"><div>';
+  html += '<div class="kpi-name">' + empName + '</div>';
+  html += '<div style="font-size:13px;color:#8892b0;margin-top:4px">' + district + ' · ' + star + '</div>';
+  html += '</div><div class="kpi-badge">' + (rankVal ? T.rank + rankVal + T.name : '') + '</div></div>';
 
-  // Find KPI total (largest number)
-  let scores={},teamAvgs={},rankField=null;
-  cols.forEach((k,i)=>{
-    if(i<4)return; // skip first 4 columns
-    const v=d[k];
-    if(v===null||v===undefined)return;
-    if(typeof v==='number'){
-      // Check if it's a team average field
-      if(k.indexOf('\u56e2\u961f\u503c')!==-1||k.indexOf('\u6807\u51c6\u5dee')!==-1||k.indexOf('\u6700\u9ad8\u5206')!==-1){
-        teamAvgs[k]=v;
-      }else{
-        scores[k]=v;
+  // Separate scores vs team averages
+  var scores = {}, teamAvgs = {};
+  cols.forEach(function(k, i) {
+    if (i < 4) return;
+    var v = d[k];
+    if (v === null || v === undefined) return;
+    if (typeof v === 'number') {
+      if (k.indexOf('团队值') !== -1 || k.indexOf('标准差') !== -1 || k.indexOf('最高分') !== -1) {
+        teamAvgs[k] = v;
+      } else {
+        scores[k] = v;
       }
     }
   });
 
-  // KPI total = max score
-  let kpiTotal=0,kpiKey='';
-  Object.entries(scores).forEach(([k,v])=>{if(v>kpiTotal){kpiTotal=v;kpiKey=k}});
+  // KPI total = max score value
+  var kpiTotal = 0, kpiKey = '';
+  for (var sk in scores) { if (scores[sk] > kpiTotal) { kpiTotal = scores[sk]; kpiKey = sk; } }
   delete scores[kpiKey];
 
-  // Find deviation
-  let devKey=null;
-  Object.keys(scores).forEach(k=>{const v=d[k];if(typeof v==='number'&&v>0&&v<100)devKey=k});
+  // Find deviation (a number between 0-100 that's not a score)
+  var devKey = null;
+  for (var dk in scores) { var dv = d[dk]; if (typeof dv === 'number' && dv > 0 && dv < 100) { devKey = dk; break; } }
 
-  html+='<div class="kpi-score">';
-  html+='<div class="number">'+kpiTotal.toFixed(2)+'</div>';
-  html+='<div class="label">KPI\u603b\u5f97\u5206</div>';
-  if(devKey)html+='<div class="sub">\u8ddd\u4e0a\u7ebf\u504f\u5dee: '+d[devKey]+'</div>';
-  html+='</div>';
+  html += '<div class="kpi-score">';
+  html += '<div class="number">' + kpiTotal.toFixed(2) + '</div>';
+  html += '<div class="label">' + T.kpiTotal + '</div>';
+  if (devKey) html += '<div class="sub">' + T.deviation + d[devKey] + '</div>';
+  html += '</div>';
 
   // Tabs
-  html+='<div class="tabs">';
-  html+='<button class="tab active" onclick="swTab(0)">维度得分</button>';
-  html+='<button class="tab" onclick="swTab(1)">业务明细</button>';
-  html+='<button class="tab" onclick="swTab(2)">团队对比</button>';
-  html+='</div>';
+  html += '<div class="tabs">';
+  html += '<button class="tab active" onclick="swTab(0)">' + T.scores + '</button>';
+  html += '<button class="tab" onclick="swTab(1)">' + T.details + '</button>';
+  html += '<button class="tab" onclick="swTab(2)">' + T.compare + '</button>';
+  html += '</div>';
 
   // Tab 0: Scores
-  html+='<div id="t0">';
-  html+='<div class="section"><div class="section-title">得分明细</div><div class="scores-grid">';
-  Object.entries(scores).forEach(([k,v])=>{
-    const avg=teamAvgs[k+'\u56e2\u961f\u503c']||null;
-    const above=avg?v>=avg:true;
-    html+='<div class="score-item">';
-    html+='<div class="name">'+k.replace(/_\u5f97\u5206$/,'')+(avg?' <span style="color:#5a6380">(\u5747'+avg+')</span>':'')+'</div>';
-    html+='<div class="value" style="color:'+(above?'#66bb6a':'#ef5350')+'">'+v+'</div>';
-    html+='</div>';
-  });
-  html+='</div></div>';
-
-  // Tags
-  const tagKeys=cols.filter(k=>Array.isArray(d[k])&&d[k].length>0);
-  if(tagKeys.length>0){
-    html+='<div class="section"><div class="section-title">\u4f18\u52bf\u4e0e\u77ed\u677f</div><div class="tag-row">';
-    tagKeys.forEach((k,i)=>{
-      const cls=i===0?'tag-green':'tag-red';
-      const lbl=i===0?'\u4f18\u52bf: ':'\u77ed\u677f: ';
-      d[k].forEach(t=>{html+='<span class="tag '+cls+'">'+lbl+t+'</span>'});
-    });
-    html+='</div></div>';
+  html += '<div id="t0">';
+  html += '<div class="section"><div class="section-title">' + T.scoreDetail + '</div><div class="scores-grid">';
+  for (var sk in scores) {
+    var avg = teamAvgs[sk.replace('得分', '团队值')] || null;
+    var above = avg ? scores[sk] >= avg : true;
+    var displayName = sk.replace('_得分', '');
+    html += '<div class="score-item">';
+    html += '<div class="name">' + displayName + (avg ? ' <span style="color:#5a6380">(均' + avg + ')</span>' : '') + '</div>';
+    html += '<div class="value" style="color:' + (above ? '#66bb6a' : '#ef5350') + '">' + scores[sk] + '</div>';
+    html += '</div>';
   }
-  html+='</div>';
+  html += '</div></div>';
 
-  // Tab 1: Details
-  html+='<div id="t1" class="hidden">';
-  cols.forEach(k=>{
-    const v=d[k];
-    if(typeof v==='string'&&(v[0]==='['||v[0]==='{')){
-      try{
-        const obj=JSON.parse(v);
-        if(typeof obj==='object'&&!Array.isArray(obj)){
-          html+='<div class="section"><div class="section-title">'+k+'</div>';
-          html+='<table class="detail-table"><thead><tr><th>指标</th><th>得分</th></tr></thead><tbody>';
-          Object.entries(obj).forEach(([n,val])=>{html+='<tr><td>'+n+'</td><td>'+val+'</td></tr>'});
-          html+='</tbody></table></div>';
+  // Tags (优势/短板)
+  var tagKeys = cols.filter(function(k) { return Array.isArray(d[k]) && d[k].length > 0; });
+  if (tagKeys.length > 0) {
+    html += '<div class="section"><div class="section-title">' + T.advantageWeakness + '</div><div class="tag-row">';
+    tagKeys.forEach(function(k, i) {
+      var cls = i === 0 ? 'tag-green' : 'tag-red';
+      var lbl = i === 0 ? T.adv : T.weak;
+      d[k].forEach(function(t) { html += '<span class="tag ' + cls + '">' + lbl + t + '</span>'; });
+    });
+    html += '</div></div>';
+  }
+  html += '</div>';
+
+  // Tab 1: Details (JSON string fields)
+  html += '<div id="t1" class="hidden">';
+  cols.forEach(function(k) {
+    var v = d[k];
+    if (typeof v === 'string' && v.length > 2 && (v[0] === '[' || v[0] === '{')) {
+      try {
+        var obj = JSON.parse(v);
+        if (typeof obj === 'object' && !Array.isArray(obj)) {
+          html += '<div class="section"><div class="section-title">' + k + '</div>';
+          html += '<table class="detail-table"><thead><tr><th>指标</th><th>得分</th></tr></thead><tbody>';
+          for (var nk in obj) { html += '<tr><td>' + nk + '</td><td>' + obj[nk] + '</td></tr>'; }
+          html += '</tbody></table></div>';
         }
-      }catch(e){}
+      } catch(e) {}
     }
   });
-  html+='</div>';
+  html += '</div>';
 
   // Tab 2: Compare
-  html+='<div id="t2" class="hidden">';
-  html+='<div class="section"><div class="section-title">\u4e0e\u56e2\u961f\u5e73\u5747\u503c\u5bf9\u6bd4</div><div class="scores-grid">';
-  Object.entries(teamAvgs).forEach(([k,avg])=>{
-    const myKey=k.replace('\u56e2\u961f\u503c','\u5f97\u5206');
-    const myVal=d[myKey]||0;
-    const pct=avg>0?((myVal-avg)/avg*100).toFixed(1):0;
-    const color=pct>=0?'#66bb6a':'#ef5350';
-    const name=k.replace('\u56e2\u961f\u503c','').replace(/_\u5f97\u5206$/,'');
-    html+='<div class="score-item">';
-    html+='<div class="name">'+name+'</div>';
-    html+='<div class="value" style="color:'+color+'">'+myVal+' <span style="font-size:13px">('+(pct>=0?'+':'')+pct+'%)</span></div>';
-    html+='<div class="name" style="margin-top:4px">\u56e2\u961f\u5747\u503c: '+avg+'</div>';
-    html+='</div>';
-  });
-  html+='</div></div>';
+  html += '<div id="t2" class="hidden">';
+  html += '<div class="section"><div class="section-title">' + T.teamCompare + '</div><div class="scores-grid">';
+  for (var ak in teamAvgs) {
+    var avg = teamAvgs[ak];
+    var myKey = ak.replace('团队值', '得分');
+    var myVal = d[myKey] || 0;
+    var pct = avg > 0 ? ((myVal - avg) / avg * 100).toFixed(1) : 0;
+    var color = pct >= 0 ? '#66bb6a' : '#ef5350';
+    var name = ak.replace('团队值', '').replace('_得分', '');
+    html += '<div class="score-item">';
+    html += '<div class="name">' + name + '</div>';
+    html += '<div class="value" style="color:' + color + '">' + myVal + ' <span style="font-size:13px">(' + (pct >= 0 ? '+' : '') + pct + '%)</span></div>';
+    html += '<div class="name" style="margin-top:4px">' + T.teamAvg + avg + '</div>';
+    html += '</div>';
+  }
+  html += '</div></div></div>';
 
-  html+='</div>';
-  kv.innerHTML=html;
+  kv.innerHTML = html;
+  dbg('Render complete');
 }
 
-function swTab(i){
-  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+function swTab(i) {
+  document.querySelectorAll('.tabs .tab').forEach(function(t) { t.classList.remove('active'); });
   document.querySelectorAll('.tabs .tab')[i].classList.add('active');
-  for(let j=0;j<3;j++)document.getElementById('t'+j).classList.toggle('hidden',j!==i);
+  for (var j = 0; j < 3; j++) document.getElementById('t' + j).classList.toggle('hidden', j !== i);
 }
 
-// Auto login check
-(async()=>{
-  try{
-    const{data:{session}}=await sb.auth.getSession();
-    if(session){dbg('Auto-login: '+session.user.id);await loadKPI()}
-    else dbg('No session');
-  }catch(e){dbg('Init error: '+e.message)}
+// Auto login
+(async function() {
+  try {
+    var res = await sb.auth.getSession();
+    dbg('Session check: ' + (res.data.session ? 'has session' : T.noSession));
+    if (res.data.session) await loadKPI();
+  } catch(e) { dbg('Init error: ' + e.message); }
 })();
 </script>
 </body>
