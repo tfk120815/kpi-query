@@ -244,7 +244,7 @@ function renderPersonal(emp,ts){
   // Team stats
   if(ts&&ts.totalCount){
     $('tStats').innerHTML='<div class="stat-card"><div class="label">\u4f60\u7684\u6392\u540d</div><div class="value">'+emp.totalRank+'</div></div><div class="stat-card"><div class="label">\u56e2\u961f\u4eba\u6570</div><div class="value">'+ts.totalCount+'</div></div><div class="stat-card"><div class="label">\u56e2\u961f\u5747\u5206</div><div class="value">'+ts.teamAvg+'</div></div><div class="stat-card"><div class="label">\u4f60\u7684\u5f97\u5206</div><div class="value">'+emp.total.toFixed(2)+'</div></div>';
-    var pct=em.totalRank<=Math.floor(ts.totalCount*0.2)?'\u524d20%':emp.totalRank>Math.floor(ts.totalCount*0.8)?'\u540e20%':'\u4e2d\u6bb5';
+    var pct=emp.totalRank<=Math.floor(ts.totalCount*0.2)?'\u524d20%':emp.totalRank>Math.floor(ts.totalCount*0.8)?'\u540e20%':'\u4e2d\u6bb5';
     $('rankCard').innerHTML='<div style="margin-top:24px;padding:24px;background:linear-gradient(135deg,#1a3a5c,#2d5f8a);border-radius:12px;color:#fff;text-align:center"><div style="font-size:13px;opacity:.8">\u4f60\u7684KPI\u6392\u540d</div><div style="font-size:64px;font-weight:800;margin:12px 0">'+emp.totalRank+'</div><div style="font-size:16px;opacity:.8">/ '+ts.totalCount+' \u4eba</div></div>';
   }
 
