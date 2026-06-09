@@ -3,486 +3,268 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KPI绩效分析报告 - 3月</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<title>KPI绩效分析报告</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"><\/script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"><\/script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: #f0f2f5; color: #333; }
-.header { background: linear-gradient(135deg, #1a3a5c 0%, #2d5f8a 100%); color: #fff; padding: 24px 32px; display: flex; justify-content: space-between; align-items: center; }
-.header h1 { font-size: 24px; font-weight: 600; }
-.header .sub { font-size: 13px; opacity: 0.8; margin-top: 6px; }
-.header .logout-btn { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); color: #fff; padding: 6px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; }
-.header .logout-btn:hover { background: rgba(255,255,255,.25); }
-.container { max-width: 1280px; margin: 0 auto; padding: 20px; }
-.tabs { display: flex; gap: 0; background: #fff; border-radius: 8px 8px 0 0; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-.tab { flex: 1; padding: 14px 20px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 500; border-bottom: 3px solid transparent; transition: all 0.2s; background: #fafafa; color: #666; }
-.tab:hover { background: #f0f0f0; }
-.tab.active { background: #fff; color: #1a3a5c; border-bottom-color: #1a3a5c; font-weight: 600; }
-.content { background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 24px; min-height: 400px; }
-.panel { display: none; }
-.panel.active { display: block; }
-.stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px; }
-.stat-card { background: #f8f9fb; border-radius: 8px; padding: 16px; text-align: center; }
-.stat-card .label { font-size: 12px; color: #999; margin-bottom: 4px; }
-.stat-card .value { font-size: 24px; font-weight: 700; color: #1a3a5c; }
-.stat-card .value.green { color: #2e7d32; }
-.stat-card .value.red { color: #c62828; }
-.chart-row { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 24px; }
-.chart-box { flex: 1; min-width: 360px; height: 400px; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th { background: #1a3a5c; color: #fff; padding: 10px 8px; text-align: center; font-weight: 500; position: sticky; top: 0; white-space: nowrap; }
-td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; white-space: nowrap; }
-tr:hover td { background: #f5f8fc; }
-.badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
-.badge.green { background: #e8f5e9; color: #2e7d32; }
-.badge.red { background: #ffebee; color: #c62828; }
-.badge.blue { background: #e3f2fd; color: #1565c0; }
-.badge.gray { background: #f5f5f5; color: #999; }
-.improvement-card { background: #fff8f8; border-left: 4px solid #c62828; border-radius: 6px; padding: 16px 20px; margin-bottom: 12px; }
-.improvement-card .title { font-weight: 600; font-size: 15px; color: #c62828; margin-bottom: 6px; }
-.improvement-card .detail { font-size: 13px; color: #666; line-height: 1.8; }
-.improvement-card .suggestion { margin-top: 8px; padding: 8px 12px; background: #fff; border-radius: 4px; font-size: 13px; color: #333; }
-.section-title { font-size: 16px; font-weight: 600; color: #1a3a5c; margin: 20px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #1a3a5c; display: inline-block; }
-.empty { text-align: center; padding: 40px; color: #999; font-size: 14px; }
-.l2-table { max-height: 320px; overflow-y: auto; }
-.auth-wrap { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 120px); }
-.auth-card { background: #fff; border-radius: 16px; padding: 40px; width: 400px; max-width: 90vw; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
-.auth-card h2 { text-align: center; font-size: 20px; color: #1a3a5c; margin-bottom: 24px; }
-.auth-card .form-group { margin-bottom: 16px; }
-.auth-card label { display: block; font-size: 13px; color: #888; margin-bottom: 6px; }
-.auth-card input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
-.auth-card input:focus { border-color: #2d5f8a; }
-.auth-card .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #1a3a5c, #2d5f8a); border: none; border-radius: 8px; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
-.auth-card .btn:hover { opacity: 0.9; }
-.auth-card .btn:disabled { opacity: 0.5; }
-.auth-card .error { color: #c62828; font-size: 13px; text-align: center; margin-top: 12px; min-height: 20px; }
-.auth-card .success { color: #2e7d32; font-size: 13px; text-align: center; margin-top: 12px; }
-.auth-card .switch { text-align: center; margin-top: 16px; font-size: 13px; color: #888; }
-.auth-card .switch a { color: #2d5f8a; cursor: pointer; text-decoration: none; font-weight: 600; }
-.loading-wrap { text-align: center; padding: 60px 20px; color: #999; }
-.loading-wrap .spinner { display: inline-block; width: 32px; height: 32px; border: 3px solid #eee; border-top-color: #2d5f8a; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-@media (max-width: 768px) {
-  .chart-row { flex-direction: column; }
-  .chart-box { min-width: 100%; }
-  .stat-cards { grid-template-columns: repeat(2, 1fr); }
-  .header { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px 20px; }
-}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#333}
+.header{background:linear-gradient(135deg,#1a3a5c,#2d5f8a);color:#fff;padding:24px 32px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:24px;font-weight:600}
+.header .sub{font-size:13px;opacity:.8;margin-top:6px}
+.logout-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:6px 16px;border-radius:6px;font-size:13px;cursor:pointer}
+.container{max-width:1280px;margin:0 auto;padding:20px}
+.tabs{display:flex;background:#fff;border-radius:8px 8px 0 0;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.tab{flex:1;padding:14px 20px;text-align:center;cursor:pointer;font-size:14px;font-weight:500;border-bottom:3px solid transparent;transition:all .2s;background:#fafafa;color:#666}
+.tab:hover{background:#f0f0f0}
+.tab.active{background:#fff;color:#1a3a5c;border-bottom-color:#1a3a5c;font-weight:600}
+.content{background:#fff;border-radius:0 0 8px 8px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:24px;min-height:400px}
+.panel{display:none}
+.panel.active{display:block}
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:#f8f9fb;border-radius:8px;padding:16px;text-align:center}
+.stat-card .label{font-size:12px;color:#999;margin-bottom:4px}
+.stat-card .value{font-size:24px;font-weight:700;color:#1a3a5c}
+.stat-card .value.green{color:#2e7d32}
+.stat-card .value.red{color:#c62828}
+.chart-row{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:24px}
+.chart-box{flex:1;min-width:360px;height:400px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#1a3a5c;color:#fff;padding:10px 8px;text-align:center;font-weight:500;white-space:nowrap}
+td{padding:8px;text-align:center;border-bottom:1px solid #eee;white-space:nowrap}
+tr:hover td{background:#f5f8fc}
+.badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:500}
+.badge.green{background:#e8f5e9;color:#2e7d32}
+.badge.red{background:#ffebee;color:#c62828}
+.badge.blue{background:#e3f2fd;color:#1565c0}
+.improvement-card{background:#fff8f8;border-left:4px solid #c62828;border-radius:6px;padding:16px 20px;margin-bottom:12px}
+.improvement-card .title{font-weight:600;font-size:15px;color:#c62828;margin-bottom:6px}
+.improvement-card .detail{font-size:13px;color:#666;line-height:1.8}
+.section-title{font-size:16px;font-weight:600;color:#1a3a5c;margin:20px 0 12px;padding-bottom:8px;border-bottom:2px solid #1a3a5c;display:inline-block}
+.empty{text-align:center;padding:40px;color:#999;font-size:14px}
+.l2-table{max-height:320px;overflow-y:auto}
+.auth-wrap{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 120px)}
+.auth-card{background:#fff;border-radius:16px;padding:40px;width:400px;max-width:90vw;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.auth-card h2{text-align:center;font-size:20px;color:#1a3a5c;margin-bottom:24px}
+.auth-card .fg{margin-bottom:16px}
+.auth-card label{display:block;font-size:13px;color:#888;margin-bottom:6px}
+.auth-card input{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none}
+.auth-card input:focus{border-color:#2d5f8a}
+.auth-card .btn{width:100%;padding:12px;background:linear-gradient(135deg,#1a3a5c,#2d5f8a);border:none;border-radius:8px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+.auth-card .error{color:#c62828;font-size:13px;text-align:center;margin-top:12px;min-height:20px}
+.auth-card .success{color:#2e7d32;font-size:13px;text-align:center;margin-top:12px}
+.auth-card .sw{text-align:center;margin-top:16px;font-size:13px;color:#888}
+.auth-card .sw a{color:#2d5f8a;cursor:pointer;font-weight:600}
+.loading{text-align:center;padding:60px 20px;color:#999}
+.loading .sp{display:inline-block;width:32px;height:32px;border:3px solid #eee;border-top-color:#2d5f8a;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err-box{background:#fff3f3;border:1px solid #ffcdd2;border-radius:8px;padding:20px;color:#c62828;font-size:14px;word-break:break-all}
+@media(max-width:768px){.chart-row{flex-direction:column}.chart-box{min-width:100%}.stat-cards{grid-template-columns:repeat(2,1fr)}.header{flex-direction:column;align-items:flex-start;gap:12px;padding:16px 20px}}
 </style>
 </head>
 <body>
-
-<div class="header">
-  <div><h1>KPI绩效分析报告 - 3月</h1><div class="sub">网格经理2026年考核</div></div>
-  <div id="headerActions" style="display:none"><button class="logout-btn" onclick="doLogout()">退出登录</button></div>
-</div>
-
-<div id="authView">
-  <div class="auth-wrap">
-    <div class="auth-card">
-      <h2 id="authTitle">登录</h2>
-      <div id="loginForm">
-        <div class="form-group"><label>工号</label><input id="lId" placeholder="请输入工号"></div>
-        <div class="form-group"><label>密码</label><input id="lPwd" type="password" placeholder="请输入密码"></div>
-        <button class="btn" onclick="doLogin()">登录</button>
-        <div class="error" id="lErr"></div>
-        <div class="switch">还没有账号？<a onclick="switchAuth('register')">注册</a></div>
-      </div>
-      <div id="regForm" style="display:none">
-        <div class="form-group"><label>工号</label><input id="rId" placeholder="请输入工号"></div>
-        <div class="form-group"><label>姓名</label><input id="rName" placeholder="请输入姓名（需与系统一致）"></div>
-        <div class="form-group"><label>密码</label><input id="rPwd" type="password" placeholder="设置密码（至少6位）"></div>
-        <button class="btn" onclick="doRegister()">注册</button>
-        <div class="error" id="rErr"></div>
-        <div class="switch">已有账号？<a onclick="switchAuth('login')">登录</a></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="mainView" style="display:none">
-  <div class="container">
-    <div class="tabs">
-      <div class="tab active" data-tab="personal">个人分析</div>
-      <div class="tab" data-tab="team">排名与统计</div>
-      <div class="tab" data-tab="improve">改进计划</div>
-      <div class="tab" data-tab="model">模型概览</div>
-    </div>
-    <div class="content">
-      <div class="panel active" id="panel-personal">
-        <div class="stat-cards" id="personalStats"></div>
-        <div class="chart-row">
-          <div class="chart-box" id="radarChart"></div>
-          <div class="chart-box" id="barChart"></div>
-        </div>
-        <div class="section-title">各维度得分详情</div>
-        <table id="personalTable"></table>
-        <div class="section-title" style="margin-top:20px">二级指标明细</div>
-        <div class="l2-table"><table id="l2Table"></table></div>
-      </div>
-      <div class="panel" id="panel-team">
-        <div class="stat-cards" id="teamStats"></div>
-        <div id="rankCard"></div>
-      </div>
-      <div class="panel" id="panel-improve">
-        <div id="improveList"></div>
-      </div>
-      <div class="panel" id="panel-model">
-        <div class="section-title">KPI指标体系（100分封顶，加扣分项另计）</div>
-        <table id="modelTable"></table>
-      </div>
-    </div>
-  </div>
-</div>
-
+<div id="page"></div>
 <script>
+// Utils
+function b64d(s){var r=atob(s);var u=new Uint8Array(r.length);for(var i=0;i<r.length;i++)u[i]=r.charCodeAt(i);return JSON.parse(new TextDecoder("utf-8").decode(u))}
+
+// Static data (base64 encoded to avoid any encoding issues)
+var STATIC_MODEL=b64d("W3sibDEiOiAiXHU3OWVmXHU1MjA2IiwgImwyIjogIlx1NTFjMFx1NTg5ZVx1NzllZlx1NTIwNiIsICJ3ZWlnaHQiOiAxMDAsICJtYXhTY29yZSI6IDIwLCAic2NvcmluZ1J1bGUiOiAiXHU2MzA5XHU1YjhjXHU2MjEwXHU3Mzg3XHU4YmExXHU3Yjk3XHVmZjBjMTIwJVx1NWMwMVx1OTg3NiJ9LCB7ImwxIjogIlx1OTFjZFx1NzBiOVx1NGUxYVx1NTJhMSIsICJsMiI6ICJcdTg3OGRcdTU0MDhcdTViYmRcdTVlMjYrXHU0ZTI0XHU3ZWJmIiwgIndlaWdodCI6IDUwLCAibWF4U2NvcmUiOiAzMCwgInNjb3JpbmdSdWxlIjogIlx1NjMwOVx1NWI4Y1x1NjIxMFx1NzM4N1x1OGJhMVx1N2I5N1x1ZmYwYzEyMCVcdTVjMDFcdTk4NzYifSwgeyJsMSI6ICJcdTkxY2RcdTcwYjlcdTRlMWFcdTUyYTEiLCAibDIiOiAiRlRUUi1CIiwgIndlaWdodCI6IDI1LCAibWF4U2NvcmUiOiAxNSwgInNjb3JpbmdSdWxlIjogIlx1NjMwOVx1NWI4Y1x1NjIxMFx1NzM4N1x1OGJhMVx1N2I5N1x1ZmYwYzEyMCVcdTVjMDFcdTk4NzYifSwgeyJsMSI6ICJcdTkxY2RcdTcwYjlcdTRlMWFcdTUyYTEiLCAibDIiOiAiXHU4OWM2XHU4MDU0XHU3ZjUxXHU0ZTkxXHU1YjU4IiwgIndlaWdodCI6IDE2LjcsICJtYXhTY29yZSI6IDEwLCAic2NvcmluZ1J1bGUiOiAiXHU2MzA5XHU1YjhjXHU2MjEwXHU3Mzg3XHU4YmExXHU3Yjk3XHVmZjBjMTIwJVx1NWMwMVx1OTg3NiJ9LCB7ImwxIjogIlx1OTFjZFx1NzBiOVx1NGUxYVx1NTJhMSIsICJsMiI6ICJcdTkxNTJcdTdmOGUiLCAid2VpZ2h0IjogOC4zLCAibWF4U2NvcmUiOiA1LCAic2NvcmluZ1J1bGUiOiAiXHU2MzA5XHU1YjhjXHU2MjEwXHU3Mzg3XHU4YmExXHU3Yjk3XHVmZjBjMTIwJVx1NWMwMVx1OTg3NiJ9LCB7ImwxIjogIlx1ODljNFx1NWI5YVx1NTJhOFx1NGY1YyIsICJsMiI6ICJcdTU3ZmFcdTc4NDBcdTdiYTFcdTc0MDYoXHU2MmRjXHU4YmJmKSIsICJ3ZWlnaHQiOiAzMCwgIm1heFNjb3JlIjogMywgInNjb3JpbmdSdWxlIjogIlx1NTNkNlx1NmM5OVx1NzZkOFx1NjI1M1x1NTM2MVx1NWI4Y1x1NjIxMFx1NzM4N1x1ZmYwYzEwMCVcdTVjMDFcdTk4NzYifSwgeyJsMSI6ICJcdTg5YzRcdTViOWFcdTUyYThcdTRmNWMiLCAibDIiOiAiXHU1YjU4XHU5MWNmXHU3ZWY0XHU3Y2ZiKFx1NmIyMFx1NTA1Y1x1NTkwZFx1NjczYSkiLCAid2VpZ2h0IjogNzAsICJtYXhTY29yZSI6IDUsICJzY29yaW5nUnVsZSI6ICJcdTZiMjBcdTUwNWNcdTU5MGRcdTY3M2FcdTczODdcdThmYmVcdTY4MDc4NSVcdWZmMGNcdTZiY2ZcdTRmNGUxJVx1NjI2MzFcdTUyMDYifSwgeyJsMSI6ICJcdTUyYTBcdTYyNjNcdTUyMDZcdTk4NzkiLCAibDIiOiAiXHU2ODA3XHU1MWM2SUNUXHU5YWQ4XHU5NjM2XHU3MjQ4IiwgIndlaWdodCI6IDEwLCAibWF4U2NvcmUiOiAzLCAic2NvcmluZ1J1bGUiOiAiMVx1NGUyYVx1NTJhMDNcdTUyMDZcdWZmMGMzXHU1MjA2XHU1YzAxXHU5ODc2In0sIHsibDEiOiAiXHU1MmEwXHU2MjYzXHU1MjA2XHU5ODc5IiwgImwyIjogIlx1NGU5MVx1NzUzNVx1ODExMSIsICJ3ZWlnaHQiOiAxMCwgIm1heFNjb3JlIjogMywgInNjb3JpbmdSdWxlIjogIjFcdTYyMzdcdTUyYTAxXHU1MjA2XHVmZjBjM1x1NTIwNlx1NWMwMVx1OTg3NiJ9LCB7ImwxIjogIlx1NTJhMFx1NjI2M1x1NTIwNlx1OTg3OSIsICJsMiI6ICJcdTVjMGZcdTVmYWVJQ1QiLCAid2VpZ2h0IjogMTYuNywgIm1heFNjb3JlIjogNSwgInNjb3JpbmdSdWxlIjogIjUwMFx1NTE0M1x1NTJhMDFcdTUyMDZcdWZmMGNcdTZiY2ZcdTZlZTEyMDAwXHU1MTQzXHU1MmEwMVx1NTIwNlx1ZmYwYzVcdTUyMDZcdTVjMDFcdTk4NzYifSwgeyJsMSI6ICJcdTUyYTBcdTYyNjNcdTUyMDZcdTk4NzkiLCAibDIiOiAiXHU5YWQ4XHU0ZWY3XHU1MDNjXHU1MzRmXHU4YmFlXHU5NTAxXHU1YjU4IiwgIndlaWdodCI6IDE2LjcsICJtYXhTY29yZSI6IDUsICJzY29yaW5nUnVsZSI6ICJcdThmYmVcdTY4MDcrNVx1NTIwNlx1ZmYwYzgwJVx1NGVlNVx1NGUwYS0yXHU1MjA2XHVmZjBjXHU0ZjRlXHU0ZThlODAlLTVcdTUyMDYifSwgeyJsMSI6ICJcdTUyYTBcdTYyNjNcdTUyMDZcdTk4NzkiLCAibDIiOiAiXHU1MzRmXHU4YmFlXHU3ZWVkXHU3YjdlIiwgIndlaWdodCI6IDE2LjcsICJtYXhTY29yZSI6IDUsICJzY29yaW5nUnVsZSI6ICIxXHU0ZWZkXHU1MmEwMVx1NTIwNlx1ZmYwYzVcdTUyMDZcdTVjMDFcdTk4NzYifSwgeyJsMSI6ICJcdTUyYTBcdTYyNjNcdTUyMDZcdTk4NzkiLCAibDIiOiAiXHU3ZmZjXHU5NTEwXHU2NjdhXHU2Mjk1IiwgIndlaWdodCI6IDEwLCAibWF4U2NvcmUiOiA1LCAic2NvcmluZ1J1bGUiOiAiMVx1NjIzN1x1NTJhMDVcdTUyMDZcdWZmMGM1XHU1MjA2XHU1YzAxXHU5ODc2In0sIHsibDEiOiAiXHU1MmEwXHU2MjYzXHU1MjA2XHU5ODc5IiwgImwyIjogIlx1OTFjZlx1NWI1MCIsICJ3ZWlnaHQiOiA2LjcsICJtYXhTY29yZSI6IDMsICJzY29yaW5nUnVsZSI6ICIxXHU0ZTJhXHU1MmEwMC41XHU1MjA2XHVmZjBjM1x1NTIwNlx1NWMwMVx1OTg3NiJ9LCB7ImwxIjogIlx1NTJhMFx1NjI2M1x1NTIwNlx1OTg3OSIsICJsMiI6ICJcdTViODlcdTUxNjgiLCAid2VpZ2h0IjogNi43LCAibWF4U2NvcmUiOiAzLCAic2NvcmluZ1J1bGUiOiAiXHU1Yjg5XHU1MTY4XHU1OTI3XHU4MTExKzNcdWZmMGNcdTUxNzZcdTRlZDYwLjVcdTUyMDZcdWZmMGMzXHU1MjA2XHU1YzAxXHU5ODc2In0sIHsibDEiOiAiXHU1MmEwXHU2MjYzXHU1MjA2XHU5ODc5IiwgImwyIjogIlx1NjcwZFx1NTJhMVx1NjI5NVx1OGJjOSIsICJ3ZWlnaHQiOiA2LjcsICJtYXhTY29yZSI6IC05OTksICJzY29yaW5nUnVsZSI6ICJcdTY3MDlcdThkMjNcdTYyOTVcdThiYzkyXHU1MjA2L1x1NmIyMVx1NjI2M1x1NTIwNiJ9LCB7ImwxIjogIlx1NTIwNlx1NWM0MFx1OTU3Zlx1NjI1M1x1NTIwNiIsICJsMiI6ICJcdTUyMDZcdTVjNDBcdTk1N2ZcdTYyNTNcdTUyMDYiLCAid2VpZ2h0IjogMTAwLCAibWF4U2NvcmUiOiAxMCwgInNjb3JpbmdSdWxlIjogIlBLXHU1MjRkNVx1NTQwZFx1NjcwMFx1OWFkODEwXHU1MjA2XHVmZjBjNi0xMFx1NTQwZFx1NjcwMFx1OWFkODhcdTUyMDZcdWZmMGMxMVx1NTQwZFx1NTQwZVx1NjcwMFx1OWFkODZcdTUyMDYifV0=");
+var STATIC_L1NAMES=b64d("WyJcdTc5ZWZcdTUyMDYiLCAiXHU5MWNkXHU3MGI5XHU0ZTFhXHU1MmExIiwgIlx1ODljNFx1NWI5YVx1NTJhOFx1NGY1YyIsICJcdTUyYTBcdTYyNjNcdTUyMDZcdTk4NzkiLCAiXHU1MjA2XHU1YzQwXHU5NTdmXHU2MjUzXHU1MjA2Il0=");
+var STATIC_L1MAX=b64d("eyJcdTc5ZWZcdTUyMDYiOiAyMCwgIlx1OTFjZFx1NzBiOVx1NGUxYVx1NTJhMSI6IDYwLCAiXHU4OWM0XHU1YjlhXHU1MmE4XHU0ZjVjIjogMTAsICJcdTUyYTBcdTYyNjNcdTUyMDZcdTk4NzkiOiAzMCwgIlx1NTIwNlx1NWM0MFx1OTU3Zlx1NjI1M1x1NTIwNiI6IDEwfQ==");
+var STATIC_L1STATS=b64d("eyJcdTc5ZWZcdTUyMDYiOiB7ImF2ZyI6IDE2LjM1LCAic3RkIjogOC4yOX0sICJcdTkxY2RcdTcwYjlcdTRlMWFcdTUyYTEiOiB7ImF2ZyI6IDMwLjkzLCAic3RkIjogMTguOTZ9LCAiXHU4OWM0XHU1YjlhXHU1MmE4XHU0ZjVjIjogeyJhdmciOiA0LjQ0LCAic3RkIjogMi44OH0sICJcdTUyYTBcdTYyNjNcdTUyMDZcdTk4NzkiOiB7ImF2ZyI6IDAuMTgsICJzdGQiOiAzLjQxfSwgIlx1NTIwNlx1NWM0MFx1OTU3Zlx1NjI1M1x1NTIwNiI6IHsiYXZnIjogOC40OSwgInN0ZCI6IDEuNDF9fQ==");
+var STATIC_L1WEIGHTS=b64d("eyJcdTc5ZWZcdTUyMDYiOiAyMCwgIlx1OTFjZFx1NzBiOVx1NGUxYVx1NTJhMSI6IDYwLCAiXHU4OWM0XHU1YjlhXHU1MmE4XHU0ZjVjIjogMTAsICJcdTUyYTBcdTYyNjNcdTUyMDZcdTk4NzkiOiAwLCAiXHU1MjA2XHU1YzQwXHU5NTdmXHU2MjUzXHU1MjA2IjogMTB9");
+var STATIC_TEAMAVG=b64d("NjAuNTY=");
+var STATIC_TOTALCOUNT=b64d("Mzc=");
+
 var SB_URL='https://fqrlmdqnoaxtqwvxmedo.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxcmxtZHFub2F4dHF3dnhtZWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5Njk4ODIsImV4cCI6MjA5NjU0NTg4Mn0.V_gds7P0YIf3SJ3ikWjM4HcSXkjIuBy9WDvUxge2rso';
 var sb=supabase.createClient(SB_URL,SB_KEY);
 
-// KPI model (public info - safe to embed)
-var MODEL=[{"l1": "\u79ef\u5206", "l2": "\u51c0\u589e\u79ef\u5206", "weight": 100, "maxScore": 20, "scoringRule": "\u6309\u5b8c\u6210\u7387\u8ba1\u7b97\uff0c120%\u5c01\u9876"}, {"l1": "\u91cd\u70b9\u4e1a\u52a1", "l2": "\u878d\u5408\u5bbd\u5e26+\u4e24\u7ebf", "weight": 50, "maxScore": 30, "scoringRule": "\u6309\u5b8c\u6210\u7387\u8ba1\u7b97\uff0c120%\u5c01\u9876"}, {"l1": "\u91cd\u70b9\u4e1a\u52a1", "l2": "FTTR-B", "weight": 25, "maxScore": 15, "scoringRule": "\u6309\u5b8c\u6210\u7387\u8ba1\u7b97\uff0c120%\u5c01\u9876"}, {"l1": "\u91cd\u70b9\u4e1a\u52a1", "l2": "\u89c6\u8054\u7f51\u4e91\u5b58", "weight": 16.7, "maxScore": 10, "scoringRule": "\u6309\u5b8c\u6210\u7387\u8ba1\u7b97\uff0c120%\u5c01\u9876"}, {"l1": "\u91cd\u70b9\u4e1a\u52a1", "l2": "\u9152\u7f8e", "weight": 8.3, "maxScore": 5, "scoringRule": "\u6309\u5b8c\u6210\u7387\u8ba1\u7b97\uff0c120%\u5c01\u9876"}, {"l1": "\u89c4\u5b9a\u52a8\u4f5c", "l2": "\u57fa\u7840\u7ba1\u7406(\u62dc\u8bbf)", "weight": 30, "maxScore": 3, "scoringRule": "\u53d6\u6c99\u76d8\u6253\u5361\u5b8c\u6210\u7387\uff0c100%\u5c01\u9876"}, {"l1": "\u89c4\u5b9a\u52a8\u4f5c", "l2": "\u5b58\u91cf\u7ef4\u7cfb(\u6b20\u505c\u590d\u673a)", "weight": 70, "maxScore": 5, "scoringRule": "\u6b20\u505c\u590d\u673a\u7387\u8fbe\u680785%\uff0c\u6bcf\u4f4e1%\u62631\u5206"}, {"l1": "\u52a0\u6263\u5206\u9879", "l2": "\u6807\u51c6ICT\u9ad8\u9636\u7248", "weight": 10, "maxScore": 3, "scoringRule": "1\u4e2a\u52a03\u5206\uff0c3\u5206\u5c01\u9876"}, {"l1": "\u52a0\u6263\u5206\u9879", "l2": "\u4e91\u7535\u8111", "weight": 10, "maxScore": 3, "scoringRule": "1\u6237\u52a01\u5206\uff0c3\u5206\u5c01\u9876"}, {"l1": "\u52a0\u6263\u5206\u9879", "l2": "\u5c0f\u5faeICT", "weight": 16.7, "maxScore": 5, "scoringRule": "500\u5143\u52a01\u5206\uff0c\u6bcf\u6ee12000\u5143\u52a01\u5206\uff0c5\u5206\u5c01\u9876"}, {"l1": "\u52a0\u6263\u5206\u9879", "l2": "\u9ad8\u4ef7\u503c\u534f\u8bae\u9501\u5b58", "weight": 16.7, "maxScore": 5, "scoringRule": "\u8fbe\u6807+5\u5206\uff0c80%\u4ee5\u4e0a-2\u5206\uff0c\u4f4e\u4e8e80%-5\u5206"}, {"l1": "\u52a0\u6263\u5206\u9879", "l2": "\u534f\u8bae\u7eed\u7b7e", "weight": 16.7, "maxScore": 5, "scoringRule": "1\u4efd\u52a01\u5206\uff0c5\u5206\u5c01\u9876"}, {"l1": "\u52a0\u6263\u5206\u9879", "l2": "\u7ffc\u9510\u667a\u6295", "weight": 10, "maxScore": 5, "scoringRule": "1\u6237\u52a05\u5206\uff0c5\u5206\u5c01\u9876"}, {"l1": "\u52a0\u6263\u5206\u9879", "l2": "\u91cf\u5b50", "weight": 6.7, "maxScore": 3, "scoringRule": "1\u4e2a\u52a00.5\u5206\uff0c3\u5206\u5c01\u9876"}, {"l1": "\u52a0\u6263\u5206\u9879", "l2": "\u5b89\u5168", "weight": 6.7, "maxScore": 3, "scoringRule": "\u5b89\u5168\u5927\u8111+3\uff0c\u5176\u4ed60.5\u5206\uff0c3\u5206\u5c01\u9876"}, {"l1": "\u52a0\u6263\u5206\u9879", "l2": "\u670d\u52a1\u6295\u8bc9", "weight": 6.7, "maxScore": -999, "scoringRule": "\u6709\u8d23\u6295\u8bc92\u5206/\u6b21\u6263\u5206"}, {"l1": "\u5206\u5c40\u957f\u6253\u5206", "l2": "\u5206\u5c40\u957f\u6253\u5206", "weight": 100, "maxScore": 10, "scoringRule": "PK\u524d5\u540d\u6700\u9ad810\u5206\uff0c6-10\u540d\u6700\u9ad88\u5206\uff0c11\u540d\u540e\u6700\u9ad86\u5206"}];
-var L1_NAMES=["\u79ef\u5206", "\u91cd\u70b9\u4e1a\u52a1", "\u89c4\u5b9a\u52a8\u4f5c", "\u52a0\u6263\u5206\u9879", "\u5206\u5c40\u957f\u6253\u5206"];
-var L1_MAX={"\u79ef\u5206": 20, "\u91cd\u70b9\u4e1a\u52a1": 60, "\u89c4\u5b9a\u52a8\u4f5c": 10, "\u52a0\u6263\u5206\u9879": 30, "\u5206\u5c40\u957f\u6253\u5206": 10};
+var myEmp=null;
 
-// State
-var myData=null, allTeamStats=null;
+function $(id){return document.getElementById(id)}
+function showErr(msg){$('page').innerHTML='<div style="padding:40px"><div class="err-box">'+msg+'</div></div>'}
 
-function switchAuth(mode){
-  document.getElementById('authTitle').textContent=mode==='login'?'登录':'注册';
-  document.getElementById('loginForm').style.display=mode==='login'?'block':'none';
-  document.getElementById('regForm').style.display=mode==='register'?'block':'none';
-  document.getElementById('lErr').textContent='';
-  document.getElementById('rErr').textContent='';
-  document.getElementById('rErr').className='error';
+function showAuth(){
+  $('page').innerHTML='<div class="header"><div><h1>KPI\u7ee9\u6548\u5206\u6790\u62a5\u544a</h1></div></div><div class="auth-wrap"><div class="auth-card"><h2 id="aT">\u767b\u5f55</h2><div id="lF"><div class="fg"><label>\u5de5\u53f7</label><input id="lId" placeholder="\u8bf7\u8f93\u5165\u5de5\u53f7"></div><div class="fg"><label>\u5bc6\u7801</label><input id="lPwd" type="password" placeholder="\u8bf7\u8f93\u5165\u5bc6\u7801"></div><button class="btn" onclick="doLogin()">\u767b\u5f55</button><div class="error" id="lErr"></div><div class="sw">\u8fd8\u6ca1\u6709\u8d26\u53f7\uff1f<a onclick="swAuth(1)">\u6ce8\u518c</a></div></div><div id="rF" style="display:none"><div class="fg"><label>\u5de5\u53f7</label><input id="rId" placeholder="\u8bf7\u8f93\u5165\u5de5\u53f7"></div><div class="fg"><label>\u59d3\u540d</label><input id="rNm" placeholder="\u8bf7\u8f93\u5165\u59d3\u540d\uff08\u9700\u4e0e\u7cfb\u7edf\u4e00\u81f4\uff09"></div><div class="fg"><label>\u5bc6\u7801</label><input id="rPwd" type="password" placeholder="\u8bbe\u7f6e\u5bc6\u7801\uff08\u81f3\u5c116\u4f4d\uff09"></div><button class="btn" onclick="doReg()">\u6ce8\u518c</button><div class="error" id="rErr"></div><div class="sw">\u5df2\u6709\u8d26\u53f7\uff1f<a onclick="swAuth(0)">\u767b\u5f55</a></div></div></div></div>';
 }
+function swAuth(m){$('aT').textContent=m?'\u6ce8\u518c':'\u767b\u5f55';$('lF').style.display=m?'none':'block';$('rF').style.display=m?'block':'none';$('lErr').textContent='';$('rErr').textContent='';$('rErr').className='error'}
 
-async function doRegister(){
-  var eid=document.getElementById('rId').value.trim(),ename=document.getElementById('rName').value.trim(),pwd=document.getElementById('rPwd').value,err=document.getElementById('rErr');
-  err.textContent='';err.className='error';
-  if(!eid||!ename||!pwd){err.textContent='请填写所有字段';return}
-  if(pwd.length<6){err.textContent='密码至少6位';return}
-  try{
-    var res=await sb.rpc('check_employee',{eid:eid,ename:ename});
-    if(res.error||!res.data){err.textContent='工号或姓名与系统记录不匹配';return}
-    var res2=await sb.auth.signUp({email:eid+'@kpi.local',password:pwd,options:{data:{emp_id:eid,emp_name:ename}}});
-    if(res2.error){var msg=res2.error.message;if(msg.indexOf('already')!==-1||msg.indexOf('Database')!==-1)err.textContent='该工号已注册，请直接登录';else err.textContent='注册失败';return}
-    err.className='success';err.textContent='注册成功！请切换到登录';
-  }catch(e){err.textContent='注册失败'}
+async function doReg(){
+  var e=$('rId').value.trim(),n=$('rNm').value.trim(),p=$('rPwd').value,er=$('rErr');er.textContent='';er.className='error';
+  if(!e||!n||!p){er.textContent='\u8bf7\u586b\u5199\u6240\u6709\u5b57\u6bb5';return}
+  if(p.length<6){er.textContent='\u5bc6\u7801\u81f3\u5c116\u4f4d';return}
+  try{var r=await sb.rpc('check_employee',{eid:e,ename:n});if(r.error||!r.data){er.textContent='\u5de5\u53f7\u6216\u59d3\u540d\u4e0e\u7cfb\u7edf\u4e0d\u5339\u914d';return}
+  var r2=await sb.auth.signUp({email:e+'@kpi.local',password:p,options:{data:{emp_id:e,emp_name:n}}});
+  if(r2.error){var m=r2.error.message;er.textContent=m.indexOf('already')!==-1||m.indexOf('Database')!==-1?'\u8be5\u5de5\u53f7\u5df2\u6ce8\u518c\uff0c\u8bf7\u767b\u5f55':'\u6ce8\u518c\u5931\u8d25';return}
+  er.className='success';er.textContent='\u6ce8\u518c\u6210\u529f\uff01\u8bf7\u767b\u5f55'}catch(x){er.textContent='\u6ce8\u518c\u5931\u8d25'}
 }
 
 async function doLogin(){
-  var eid=document.getElementById('lId').value.trim(),pwd=document.getElementById('lPwd').value,err=document.getElementById('lErr');
-  err.textContent='';
-  if(!eid||!pwd){err.textContent='请输入工号和密码';return}
-  try{
-    var res=await sb.auth.signInWithPassword({email:eid+'@kpi.local',password:pwd});
-    if(res.error){err.textContent='工号或密码错误';return}
-    await loadApp();
-  }catch(e){err.textContent='登录失败'}
+  var e=$('lId').value.trim(),p=$('lPwd').value,er=$('lErr');er.textContent='';
+  if(!e||!p){er.textContent='\u8bf7\u8f93\u5165\u5de5\u53f7\u548c\u5bc6\u7801';return}
+  try{var r=await sb.auth.signInWithPassword({email:e+'@kpi.local',password:p});if(r.error){er.textContent='\u5de5\u53f7\u6216\u5bc6\u7801\u9519\u8bef';return}
+  await loadApp()}catch(x){er.textContent='\u767b\u5f55\u5931\u8d25'}
 }
 
-async function doLogout(){
-  await sb.auth.signOut();
-  document.getElementById('authView').style.display='block';
-  document.getElementById('mainView').style.display='none';
-  document.getElementById('headerActions').style.display='none';
-  document.getElementById('lPwd').value='';
-}
+async function doLogout(){await sb.auth.signOut();showAuth()}
 
 async function loadApp(){
-  document.getElementById('authView').style.display='none';
-  document.getElementById('mainView').style.display='block';
-  document.getElementById('headerActions').style.display='block';
-  document.getElementById('mainView').innerHTML='<div class="loading-wrap"><div class="spinner"></div><div>加载KPI数据...</div></div>';
+  $('page').innerHTML='<div class="loading"><div class="sp"></div><div>\u52a0\u8f7dKPI\u6570\u636e...</div></div>';
   try{
-    // Get profile
+    // Step 1: profile
     var r1=await sb.from('profiles').select('*').single();
-    if(!r1.data){doLogout();return}
+    if(!r1.data||r1.error){showErr('\u67e5\u8be2\u6863\u6848\u5931\u8d25: '+JSON.stringify(r1.error));return}
     var prof=r1.data;
 
-    // Get ALL employees (RLS returns all since kpi_data has no auth-based RLS for select... wait)
-    // Actually the RLS policy restricts kpi_data to own data. We need team stats.
-    // Solution: use a service_role call or compute stats from the data we have
-    // For now, let's query own data and compute team stats server-side via RPC
-    // But we don't have an RPC for team stats. Let's adjust RLS or create one.
-
-    // For the individual page, query own data
+    // Step 2: my KPI
     var r2=await sb.from('kpi_data').select('*').single();
-    if(r2.error||!r2.data){document.getElementById('mainView').innerHTML='<div class="empty" style="padding:60px">未找到KPI数据</div>';return}
-    myData=r2.data;
+    if(!r2.data||r2.error){showErr('\u67e5\u8be2KPI\u5931\u8d25: '+JSON.stringify(r2.error));return}
 
-    // For team stats, we need to query all data - use a bypass
-    // The profiles table only has the logged-in user's data
-    // kpi_data RLS: users can only see their own data
-    // We need an RPC function to get team stats
+    // Step 3: team stats
     var r3=await sb.rpc('get_team_stats');
-    allTeamStats=r3.data||null;
+    var ts=r3.data||null;
 
-    // Render the page
-    renderPage(prof);
-  }catch(e){
-    console.error('loadApp error:',e);
-    document.getElementById('mainView').innerHTML='<div class="empty" style="padding:60px">加载失败: '+e.message+'</div>';
-  }
+    // Convert
+    myEmp=convertData(r2.data,prof,ts);
+    renderApp(myEmp,ts);
+  }catch(x){showErr('\u52a0\u8f7d\u5f02\u5e38: '+x.message)}
 }
 
-function convertSupabaseToFormat(d){
-  // Convert Supabase raw data to the format expected by charts
-  var keys=Object.keys(d);
-  var cols=keys.filter(function(k){return k!=='id'&&k!=='created_at'});
+function convertData(d,prof,ts){
+  var keys=Object.keys(d),cols=keys.filter(function(k){return k!=='id'&&k!=='created_at'});
+  var emp={name:d[cols[1]]||'-',star:d[cols[2]]||'-',dept:d[cols[3]]||'-',branch:d[cols[4]]||'-',total:0,totalRank:1,l1Scores:{},l2Scores:{},l2ToL1:{},advantages:[],weaknesses:[]};
 
-  var name=d[cols[1]]||'-';
-  var star=d[cols[2]]||'-';
-  var dept=d[cols[3]]||'-';
-  var branch=d[cols[4]]||'-';
+  // Find KPI total (max numeric value)
+  var maxVal=0;
+  cols.forEach(function(k,i){if(i<5)return;var v=d[k];if(typeof v==='number'&&v!==null&&k.indexOf('\u56e2\u961f')===-1&&k.indexOf('\u6807\u51c6\u5dee')===-1&&k.indexOf('\u6700\u9ad8\u5206')===-1){if(v>maxVal){maxVal=v;emp.total=v}}});
 
-  // Find KPI total and rank
-  var total=0,rank=1;
-  var scores={};
-  cols.forEach(function(k,i){if(i<4)return;var v=d[k];if(v===null||v===undefined)return;if(typeof v==='number'&&k.indexOf('团队')===-1&&k.indexOf('标准差')===-1&&k.indexOf('最高分')===-1)scores[k]=v});
-  for(var sk in scores){if(scores[sk]>total)total=scores[sk]}
-  var kpiKey='';for(var sk in scores){if(scores[sk]===total){kpiKey=sk;break}}
-  delete scores[kpiKey];
   // Find rank
-  var rankKey=null;cols.forEach(function(k){var v=d[k];if(typeof v==='number'&&v>=1&&v<=37&&v===Math.floor(v))rankKey=k});
-  if(rankKey)rank=d[rankKey];
+  cols.forEach(function(k){var v=d[k];if(typeof v==='number'&&v>=1&&v<=37&&v===Math.floor(v))emp.totalRank=v});
 
-  // Map to l1Scores
-  var l1Names=['积分','重点业务','规定动作','加扣分项','分局长打分'];
-  var l1Scores={};
-  // Find matching columns
-  cols.forEach(function(k){var v=d[k];if(typeof v!=='number'||v===null)return;
-    if(k.indexOf('积分_得分')!==-1||k==='积分_得分')l1Scores['积分']=v;
-    else if(k.indexOf('重点业务_得分')!==-1)l1Scores['重点业务']=v;
-    else if(k.indexOf('规定动作_得分')!==-1)l1Scores['规定动作']=v;
-    else if(k.indexOf('加扣分项_得分')!==-1)l1Scores['加扣分项']=v;
-    else if(k.indexOf('分局长')!==-1)l1Scores['分局长打分']=v;
+  // Map l1 scores using known column names
+  var l1Map={'\u79ef\u5206_\u5f97\u5206':'\u79ef\u5206','\u91cd\u70b9\u4e1a\u52a1_\u5f97\u5206':'\u91cd\u70b9\u4e1a\u52a1','\u89c4\u5b9a\u52a8\u4f5c_\u5f97\u5206':'\u89c4\u5b9a\u52a8\u4f5c','\u52a0\u6263\u5206\u9879_\u5f97\u5206':'\u52a0\u6263\u5206\u9879','\u5206\u5c40\u957f\u6253\u5206_\u5f97\u5206':'\u5206\u5c40\u957f\u6253\u5206'};
+  cols.forEach(function(k){if(l1Map[k])emp.l1Scores[l1Map[k]]=d[k]});
+
+  // Also try direct match with L1 names from static data
+  STATIC_L1NAMES.forEach(function(n){if(emp.l1Scores[n]===undefined){var k=n+'_\u5f97\u5206';if(d[k]!==undefined)emp.l1Scores[n]=d[k]}});
+
+  // L2 scores - remaining numeric cols that are not l1 or team stats
+  var skipCols=['id','created_at',cols[0],cols[1],cols[2],cols[3],cols[4]];
+  STATIC_L1NAMES.forEach(function(n){skipCols.push(n+'_\u5f97\u5206')});
+  cols.forEach(function(k){
+    if(skipCols.indexOf(k)!==-1)return;
+    var v=d[k];if(v===null||v===undefined)return;
+    if(typeof v==='number'){
+      if(k.indexOf('\u56e2\u961f')!==-1||k.indexOf('\u6807\u51c6\u5dee')!==-1||k.indexOf('\u6700\u9ad8\u5206')!==-1)return;
+      var clean=k.replace('_\u5f97\u5206','');
+      emp.l2Scores[clean]=v;
+      // Guess parent
+      var l1='\u5176\u4ed6';
+      if(k.indexOf('\u79ef\u5206')!==-1)l1='\u79ef\u5206';
+      else if(k.indexOf('FTTR')!==-1||k.indexOf('\u5bbd\u5e26')!==-1||k.indexOf('\u4e24\u7ebf')!==-1||k.indexOf('\u89c6\u8054')!==-1||k.indexOf('\u9152\u7f8e')!==-1)l1='\u91cd\u70b9\u4e1a\u52a1';
+      else if(k.indexOf('\u62dc\u8bbf')!==-1||k.indexOf('\u7ef4\u7cfb')!==-1||k.indexOf('ICT')!==-1||k.indexOf('\u7535\u8111')!==-1||k.indexOf('\u5c0f\u5fae')!==-1)l1='\u89c4\u5b9a\u52a8\u4f5c';
+      else if(k.indexOf('\u5b89\u5168')!==-1||k.indexOf('\u6295\u8bc9')!==-1||k.indexOf('\u9501\u5b58')!==-1||k.indexOf('\u7eed\u7b7e')!==-1||k.indexOf('\u667a\u6295')!==-1||k.indexOf('\u91cf\u5b50')!==-1)l1='\u52a0\u6263\u5206\u9879';
+      emp.l2ToL1[clean]=l1;
+    }
   });
 
-  // Map l2 scores
-  var l2Scores={};
-  var l2ToL1={};
-  cols.forEach(function(k){var v=d[k];if(typeof v!=='number'||v===null)return;
-    if(l1Scores[k]!==undefined)return; // skip l1 columns
-    if(k.indexOf('团队')!==-1||k.indexOf('标准差')!==-1||k.indexOf('最高分')!==-1)return;
-    // Clean up column name
-    var clean=k.replace('_得分','');
-    l2Scores[clean]=v;
-    // Determine l1 parent
-    if(k.indexOf('积分')!==-1)l2ToL1[clean]='积分';
-    else if(k.indexOf('FTTR')!==-1||k.indexOf('宽带')!==-1||k.indexOf('两线')!==-1||k.indexOf('视联网')!==-1||k.indexOf('酒美')!==-1||k.indexOf('云存')!==-1)l2ToL1[clean]='重点业务';
-    else if(k.indexOf('拜访')!==-1||k.indexOf('维系')!==-1||k.indexOf('ICT')!==-1||k.indexOf('电脑')!==-1||k.indexOf('小微')!==-1)l2ToL1[clean]='规定动作';
-    else if(k.indexOf('安全')!==-1||k.indexOf('投诉')!==-1||k.indexOf('锁存')!==-1||k.indexOf('续签')!==-1||k.indexOf('智投')!==-1||k.indexOf('量子')!==-1)l2ToL1[clean]='加扣分项';
-    else l2ToL1[clean]='其他';
-  });
+  // Advantages / weaknesses from array columns
+  cols.forEach(function(k){if(Array.isArray(d[k])&&d[k].length>0){if(emp.advantages.length===0)emp.advantages=d[k];else if(emp.weaknesses.length===0)emp.weaknesses=d[k]}});
 
-  // Advantages/weaknesses
-  var advantages=[],weaknesses=[];
-  var advKey=null,weakKey=null;
-  cols.forEach(function(k){if(Array.isArray(d[k])){if(!advKey)advKey=k;else weakKey=k}});
-  if(advKey)advantages=d[advKey]||[];
-  if(weakKey)weaknesses=d[weakKey]||[];
-
-  return {
-    name:name, star:star, dept:dept, branch:branch,
-    total:total, totalRank:rank,
-    l1Scores:l1Scores, l2Scores:l2Scores, l2ToL1:l2ToL1,
-    advantages:advantages, weaknesses:weaknesses,
-    weaknessesDetail:[]
-  };
+  return emp;
 }
 
-function renderPage(prof){
-  var emp=convertSupabaseToFormat(myData);
-  var html='';
+function renderApp(emp,ts){
+  var hdr='<div class="header"><div><h1>KPI\u7ee9\u6548\u5206\u6790\u62a5\u544a - 3\u6708</h1><div class="sub">'+emp.name+' ('+emp.dept+' '+emp.star+')</div></div><div><button class="logout-btn" onclick="doLogout()">\u9000\u51fa\u767b\u5f55</button></div></div>';
 
-  // Header
-  html+='<div class="header"><div><h1>KPI绩效分析报告 - 3月</h1><div class="sub">网格经理2026年考核 | '+emp.name+'（'+emp.dept+' '+emp.star+'）</div></div>';
-  html+='<div><button class="logout-btn" onclick="doLogout()">退出登录</button></div></div>';
+  var body='<div class="container"><div class="tabs">';
+  body+='<div class="tab active" data-tab="personal" onclick="swTab(this)">\u4e2a\u4eba\u5206\u6790</div>';
+  body+='<div class="tab" data-tab="team" onclick="swTab(this)">\u6392\u540d\u4e0e\u7edf\u8ba1</div>';
+  body+='<div class="tab" data-tab="improve" onclick="swTab(this)">\u6539\u8fdb\u8ba1\u5212</div>';
+  body+='<div class="tab" data-tab="model" onclick="swTab(this)">\u6a21\u578b\u6982\u89c8</div>';
+  body+='</div><div class="content">';
 
-  // Tabs
-  html+='<div class="container"><div class="tabs">';
-  html+='<div class="tab active" data-tab="personal">个人分析</div>';
-  html+='<div class="tab" data-tab="team">排名与统计</div>';
-  html+='<div class="tab" data-tab="improve">改进计划</div>';
-  html+='<div class="tab" data-tab="model">模型概览</div>';
-  html+='</div><div class="content">';
+  body+='<div class="panel active" id="p-personal"><div class="stat-cards" id="pStats"></div><div class="chart-row"><div class="chart-box" id="radarChart"></div><div class="chart-box" id="barChart"></div></div><div class="section-title">\u5404\u7ef4\u5ea6\u5f97\u5206\u8be6\u60c5</div><table id="pTable"></table><div class="section-title" style="margin-top:20px">\u4e8c\u7ea7\u6307\u6807\u660e\u7ec6</div><div class="l2-table"><table id="l2Table"></table></div></div>';
+  body+='<div class="panel" id="p-team"><div class="stat-cards" id="tStats"></div><div id="rankCard"></div></div>';
+  body+='<div class="panel" id="p-improve"><div id="improveList"></div></div>';
+  body+='<div class="panel" id="p-model"><div class="section-title">KPI\u6307\u6807\u4f53\u7cfb\uff08100\u5206\u5c01\u9876\uff0c\u52a0\u6263\u5206\u9879\u53e6\u8ba1\uff09</div><table id="mTable"></table></div>';
 
-  // Personal panel
-  html+='<div class="panel active" id="panel-personal">';
-  html+='<div class="stat-cards" id="personalStats"></div>';
-  html+='<div class="chart-row"><div class="chart-box" id="radarChart"></div><div class="chart-box" id="barChart"></div></div>';
-  html+='<div class="section-title">各维度得分详情</div><table id="personalTable"></table>';
-  html+='<div class="section-title" style="margin-top:20px">二级指标明细</div><div class="l2-table"><table id="l2Table"></table></div>';
-  html+='</div>';
+  body+='</div></div>';
+  $('page').innerHTML=hdr+body;
 
-  // Team panel
-  html+='<div class="panel" id="panel-team">';
-  html+='<div class="stat-cards" id="teamStats"></div><div id="rankCard"></div>';
-  html+='</div>';
-
-  // Improve panel
-  html+='<div class="panel" id="panel-improve"><div id="improveList"></div></div>';
-
-  // Model panel
-  html+='<div class="panel" id="panel-model"><div class="section-title">KPI指标体系（100分封顶，加扣分项另计）</div><table id="modelTable"></table></div>';
-
-  html+='</div></div>';
-
-  document.getElementById('mainView').innerHTML=html;
-
-  // Init tabs
-  document.querySelectorAll('.tab').forEach(function(tab){
-    tab.addEventListener('click',function(){
-      document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
-      document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
-      tab.classList.add('active');
-      document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
-      if(tab.dataset.tab==='personal')renderPersonal(emp);
-      if(tab.dataset.tab==='team')renderTeam(emp);
-      if(tab.dataset.tab==='improve')renderImprove(emp);
-    });
-  });
-
-  // Init charts
-  initCharts();
-  renderPersonal(emp);
+  // Init
+  initCharts(emp,ts);
+  renderPersonal(emp,ts);
   renderModel();
 }
 
-var radarChart,barChart;
-function initCharts(){
-  radarChart=echarts.init(document.getElementById('radarChart'));
-  barChart=echarts.init(document.getElementById('barChart'));
-  window.addEventListener('resize',function(){radarChart.resize();barChart.resize()});
+function swTab(el){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+  el.classList.add('active');
+  document.getElementById('p-'+el.dataset.tab).classList.add('active');
 }
 
-function renderPersonal(emp){
-  // Stats
-  document.getElementById('personalStats').innerHTML=
-    '<div class="stat-card"><div class="label">KPI总分</div><div class="value">'+emp.total+'</div></div>'+
-    '<div class="stat-card"><div class="label">排名</div><div class="value">'+emp.totalRank+'</div></div>'+
-    '<div class="stat-card"><div class="label">星级</div><div class="value" style="font-size:18px">'+emp.star+'</div></div>'+
-    '<div class="stat-card"><div class="label">优势项</div><div class="value green">'+emp.advantages.length+'</div></div>'+
-    '<div class="stat-card"><div class="label">短板项</div><div class="value red">'+emp.weaknesses.length+'</div></div>';
+var rc,bc;
+function initCharts(){rc=echarts.init($('radarChart'));bc=echarts.init($('barChart'));window.addEventListener('resize',function(){rc.resize();bc.resize()})}
 
-  var l1Names=JSON.parse(L1_NAMES);
-  var basicL1=l1Names.filter(function(n){return n!=='加扣分项'});
+function renderPersonal(emp,ts){
+  $('pStats').innerHTML='<div class="stat-card"><div class="label">KPI\u603b\u5206</div><div class="value">'+emp.total.toFixed(2)+'</div></div><div class="stat-card"><div class="label">\u6392\u540d</div><div class="value">'+emp.totalRank+'/'+(ts?ts.totalCount:STATIC_TOTALCOUNT)+'</div></div><div class="stat-card"><div class="label">\u661f\u7ea7</div><div class="value" style="font-size:18px">'+emp.star+'</div></div><div class="stat-card"><div class="label">\u4f18\u52bf\u9879</div><div class="value green">'+emp.advantages.length+'</div></div><div class="stat-card"><div class="label">\u77ed\u677f\u9879</div><div class="value red">'+emp.weaknesses.length+'</div></div>';
 
   // Radar
-  var indicator=basicL1.map(function(n){return{name:n,max:L1_MAX?L1_MAX[n]||100:100}});
-  var teamAvgs=allTeamStats?allTeamStats:{};
-  var avgVals=basicL1.map(function(n){return teamAvgs[n]?teamAvgs[n].avg:0});
+  var basicL1=STATIC_L1NAMES.filter(function(n){return n!=='\u52a0\u6263\u5206\u9879'});
+  var indicator=basicL1.map(function(n){return{name:n,max:STATIC_L1MAX[n]||100}});
+  var myVals=basicL1.map(function(n){return emp.l1Scores[n]||0});
+  var avgVals=basicL1.map(function(n){return ts&&ts.l1TeamStats&&ts.l1TeamStats[n]?ts.l1TeamStats[n].avg:(STATIC_L1STATS[n]?STATIC_L1STATS[n].avg:0)});
 
-  radarChart.setOption({
-    title:{text:emp.name+' 雷达图（基础指标）',left:'center',textStyle:{fontSize:14}},
-    tooltip:{},
-    legend:{data:['个人得分','团队均值'],bottom:0},
-    radar:{indicator:indicator,shape:'polygon',splitNumber:5},
-    series:[{type:'radar',data:[
-      {value:basicL1.map(function(n){return emp.l1Scores[n]||0}),name:'个人得分',lineStyle:{color:'#1a3a5c'},areaStyle:{color:'rgba(26,58,92,0.15)'},itemStyle:{color:'#1a3a5c'}},
-      {value:avgVals,name:'团队均值',lineStyle:{color:'#999',type:'dashed'},areaStyle:{color:'rgba(153,153,153,0.05)'},itemStyle:{color:'#999'}}
-    ]}]
-  },true);
+  rc.setOption({title:{text:emp.name+' \u96f7\u8fbe\u56fe',left:'center',textStyle:{fontSize:14}},tooltip:{},legend:{data:['\u4e2a\u4eba\u5f97\u5206','\u56e2\u961f\u5747\u503c'],bottom:0},radar:{indicator:indicator,shape:'polygon',splitNumber:5},series:[{type:'radar',data:[{value:myVals,name:'\u4e2a\u4eba\u5f97\u5206',lineStyle:{color:'#1a3a5c'},areaStyle:{color:'rgba(26,58,92,0.15)'},itemStyle:{color:'#1a3a5c'}},{value:avgVals,name:'\u56e2\u961f\u5747\u503c',lineStyle:{color:'#999',type:'dashed'},areaStyle:{color:'rgba(153,153,153,0.05)'},itemStyle:{color:'#999'}}]}]},true);
 
   // Bar - deviation
-  var diffData=l1Names.map(function(n){return{name:n,value:parseFloat(((emp.l1Scores[n]||0)-(teamAvgs[n]?teamAvgs[n].avg:0)).toFixed(2))}});
-  barChart.setOption({
-    title:{text:emp.name+' 与团队均值偏差',left:'center',textStyle:{fontSize:14}},
-    tooltip:{trigger:'axis'},
-    xAxis:{type:'category',data:l1Names,axisLabel:{rotate:20,fontSize:11}},
-    yAxis:{type:'value',name:'偏差'},
-    series:[{type:'bar',data:diffData.map(function(d){return{value:d.value,itemStyle:{color:d.value>=0?'#2e7d32':'#c62828'}}}),label:{show:true,position:'top',formatter:'{c}',fontSize:11}}]
-  },true);
+  var diffData=STATIC_L1NAMES.map(function(n){return{name:n,value:parseFloat(((emp.l1Scores[n]||0)-(ts&&ts.l1TeamStats&&ts.l1TeamStats[n]?ts.l1TeamStats[n].avg:(STATIC_L1STATS[n]?STATIC_L1STATS[n].avg:0))).toFixed(2))}});
+  bc.setOption({title:{text:emp.name+' \u4e0e\u56e2\u961f\u5747\u503c\u504f\u5dee',left:'center',textStyle:{fontSize:14}},tooltip:{trigger:'axis'},xAxis:{type:'category',data:STATIC_L1NAMES,axisLabel:{rotate:20,fontSize:11}},yAxis:{type:'value',name:'\u504f\u5dee'},series:[{type:'bar',data:diffData.map(function(d){return{value:d.value,itemStyle:{color:d.value>=0?'#2e7d32':'#c62828'}}}),label:{show:true,position:'top',formatter:'{c}',fontSize:11}}]},true);
 
   // L1 table
-  var html='<thead><tr><th>一级指标</th><th>满分</th><th>得分</th><th>团队均值</th><th>偏差</th><th>判定</th></tr></thead><tbody>';
-  l1Names.forEach(function(n){
-    var score=emp.l1Scores[n]||0;
-    var avg=teamAvgs[n]?teamAvgs[n].avg:0;
-    var diff=(score-avg).toFixed(2);
-    var judge='达标',badge='blue';
-    if(emp.advantages.indexOf(n)!==-1){judge='优势';badge='green'}
-    else if(emp.weaknesses.indexOf(n)!==-1){judge='短板';badge='red'}
-    var mx=L1_MAX?L1_MAX[n]||'-':'-';
-    html+='<tr><td>'+n+'</td><td>'+mx+'</td><td>'+score+'</td><td>'+avg+'</td><td>'+diff+'</td><td><span class="badge '+badge+'">'+judge+'</span></td></tr>';
+  var h='<thead><tr><th>\u4e00\u7ea7\u6307\u6807</th><th>\u6ee1\u5206</th><th>\u5f97\u5206</th><th>\u56e2\u961f\u5747\u503c</th><th>\u504f\u5dee</th><th>\u5224\u5b9a</th></tr></thead><tbody>';
+  STATIC_L1NAMES.forEach(function(n){
+    var s=emp.l1Scores[n]||0;var a=ts&&ts.l1TeamStats&&ts.l1TeamStats[n]?ts.l1TeamStats[n].avg:(STATIC_L1STATS[n]?STATIC_L1STATS[n].avg:0);
+    var df=(s-a).toFixed(2);var j='\u8fbe\u6807',b='blue';
+    if(emp.advantages.indexOf(n)!==-1){j='\u4f18\u52bf';b='green'}else if(emp.weaknesses.indexOf(n)!==-1){j='\u77ed\u677f';b='red'}
+    h+='<tr><td>'+n+'</td><td>'+(STATIC_L1MAX[n]||'-')+'</td><td>'+s+'</td><td>'+a+'</td><td>'+df+'</td><td><span class="badge '+b+'">'+j+'</span></td></tr>';
   });
-  html+='</tbody>';
-  document.getElementById('personalTable').innerHTML=html;
+  h+='</tbody>';$('pTable').innerHTML=h;
 
   // L2 table
   var entries=Object.entries(emp.l2Scores);
-  html='<thead><tr><th>二级指标</th><th>得分</th><th>所属一级指标</th></tr></thead><tbody>';
-  entries.forEach(function(e){html+='<tr><td>'+e[0]+'</td><td>'+e[1]+'</td><td>'+(emp.l2ToL1[e[0]]||'-')+'</td></tr>'});
-  html+='</tbody>';
-  document.getElementById('l2Table').innerHTML=html;
-}
+  h='<thead><tr><th>\u4e8c\u7ea7\u6307\u6807</th><th>\u5f97\u5206</th><th>\u6240\u5c5e\u4e00\u7ea7</th></tr></thead><tbody>';
+  entries.forEach(function(e){h+='<tr><td>'+e[0]+'</td><td>'+e[1]+'</td><td>'+(emp.l2ToL1[e[0]]||'-')+'</td></tr>'});
+  h+='</tbody>';$('l2Table').innerHTML=h;
 
-function renderTeam(emp){
-  var ts=allTeamStats||{};
-  document.getElementById('teamStats').innerHTML=
-    '<div class="stat-card"><div class="label">你的排名</div><div class="value">'+emp.totalRank+'</div></div>'+
-    '<div class="stat-card"><div class="label">团队人数</div><div class="value">'+(ts.totalCount||37)+'</div></div>'+
-    '<div class="stat-card"><div class="label">团队均分</div><div class="value">'+(ts.teamAvg||0)+'</div></div>'+
-    '<div class="stat-card"><div class="label">你的得分</div><div class="value">'+emp.total+'</div></div>'+
-    '<div class="stat-card"><div class="label">分位</div><div class="value">'+(emp.totalRank<=Math.floor((ts.totalCount||37)*0.2)?'前20%':emp.totalRank>Math.floor((ts.totalCount||37)*0.8)?'后20%':'中段')+'</div></div>';
-
-  // Highlight rank card
-  var rankHtml='<div style="margin-top:24px;padding:24px;background:linear-gradient(135deg,#1a3a5c,#2d5f8a);border-radius:12px;color:#fff;text-align:center">';
-  rankHtml+='<div style="font-size:13px;opacity:0.8">你的KPI排名</div>';
-  rankHtml+='<div style="font-size:64px;font-weight:800;margin:12px 0">'+emp.totalRank+'</div>';
-  rankHtml+='<div style="font-size:16px;opacity:0.8">/ '+(ts.totalCount||37)+' 人</div>';
-  var pct=((ts.totalCount||37)-emp.totalRank+1)/(ts.totalCount||37)*100;
-  rankHtml+='<div style="margin-top:12px;font-size:14px;opacity:0.7">超越 '+(pct).toFixed(1)+'% 的同事</div>';
-  rankHtml+='</div>';
-  document.getElementById('rankCard').innerHTML=rankHtml;
-}
-
-function renderImprove(emp){
-  var html='';
-  if(emp.weaknesses.length===0){
-    html='<div style="padding:40px;text-align:center;color:#999;font-size:14px">暂无短板项，表现优秀！</div>';
-  }else{
-    emp.weaknesses.forEach(function(w){
-      html+='<div style="margin-bottom:16px;padding:16px 20px;background:#f8f9fb;border-radius:8px;border-left:4px solid #c62828">';
-      html+='<div style="font-weight:600;font-size:15px;color:#c62828;margin-bottom:8px">短板项：'+w+'</div>';
-      var score=emp.l1Scores[w]||0;
-      var avg=allTeamStats&&allTeamStats[w]?allTeamStats[w].avg:0;
-      html+='<div style="font-size:13px;color:#666">当前得分：<strong>'+score+'</strong> | 团队均值：'+avg+' | 差距：'+(score-avg).toFixed(2)+'</div>';
-      html+='</div>';
-    });
+  // Team stats
+  if(ts&&ts.totalCount){
+    $('tStats').innerHTML='<div class="stat-card"><div class="label">\u4f60\u7684\u6392\u540d</div><div class="value">'+emp.totalRank+'</div></div><div class="stat-card"><div class="label">\u56e2\u961f\u4eba\u6570</div><div class="value">'+ts.totalCount+'</div></div><div class="stat-card"><div class="label">\u56e2\u961f\u5747\u5206</div><div class="value">'+ts.teamAvg+'</div></div><div class="stat-card"><div class="label">\u4f60\u7684\u5f97\u5206</div><div class="value">'+emp.total.toFixed(2)+'</div></div>';
+    var pct=em.totalRank<=Math.floor(ts.totalCount*0.2)?'\u524d20%':emp.totalRank>Math.floor(ts.totalCount*0.8)?'\u540e20%':'\u4e2d\u6bb5';
+    $('rankCard').innerHTML='<div style="margin-top:24px;padding:24px;background:linear-gradient(135deg,#1a3a5c,#2d5f8a);border-radius:12px;color:#fff;text-align:center"><div style="font-size:13px;opacity:.8">\u4f60\u7684KPI\u6392\u540d</div><div style="font-size:64px;font-weight:800;margin:12px 0">'+emp.totalRank+'</div><div style="font-size:16px;opacity:.8">/ '+ts.totalCount+' \u4eba</div></div>';
   }
-  // Suggestions
-  html+='<div style="margin-top:24px;padding:20px;background:#e8f5e9;border-radius:8px">';
-  html+='<div style="font-weight:600;color:#2e7d32;margin-bottom:8px">改进建议</div>';
-  html+='<div style="font-size:13px;color:#333;line-height:1.8">';
-  html+='拆解目标、优化客户结构、提升转化率、减少客户流失。<br>';
-  html+='重点关注得分低于团队平均值的维度，制定针对性提升计划。<br>';
-  html+='充分利用优势项带动短板项，形成协同效应。';
-  html+='</div></div>';
-  document.getElementById('improveList').innerHTML=html;
+
+  // Improve
+  var ih='';
+  if(emp.weaknesses.length===0){ih='<div class="empty">\u6682\u65e0\u77ed\u677f\u9879\uff0c\u8868\u73b0\u4f18\u79c0\uff01</div>'}
+  else{emp.weaknesses.forEach(function(w){var s=emp.l1Scores[w]||0;var a=ts&&ts.l1TeamStats&&ts.l1TeamStats[w]?ts.l1TeamStats[w].avg:(STATIC_L1STATS[w]?STATIC_L1STATS[w].avg:0);
+    ih+='<div class="improvement-card"><div class="title">\u77ed\u677f\u9879\uff1a'+w+'</div><div class="detail">\u5f53\u524d\u5f97\u5206\uff1a<strong>'+s+'</strong> | \u56e2\u961f\u5747\u503c\uff1a'+a+' | \u5dee\u8ddd\uff1a'+(s-a).toFixed(2)+'</div></div>'})}
+  ih+='<div style="margin-top:24px;padding:20px;background:#e8f5e9;border-radius:8px"><div style="font-weight:600;color:#2e7d32;margin-bottom:8px">\u6539\u8fdb\u5efa\u8bae</div><div style="font-size:13px;color:#333;line-height:1.8">\u62c6\u89e3\u76ee\u6807\u3001\u4f18\u5316\u5ba2\u6237\u7ed3\u6784\u3001\u63d0\u5347\u8f6c\u5316\u7387\u3001\u51cf\u5c11\u5ba2\u6237\u6d41\u5931\u3002<br>\u91cd\u70b9\u5173\u6ce8\u5f97\u5206\u4f4e\u4e8e\u56e2\u961f\u5e73\u5747\u503c\u7684\u7ef4\u5ea6\uff0c\u5236\u5b9a\u9488\u5bf9\u6027\u63d0\u5347\u8ba1\u5212\u3002</div></div>';
+  $('improveList').innerHTML=ih;
 }
 
 function renderModel(){
-  var model=JSON.parse(MODEL);
-  var html='<thead><tr><th>一级指标</th><th>二级指标</th><th>二级权重(%)</th><th>满分</th><th>评分标准</th></tr></thead><tbody>';
-  model.forEach(function(r){
-    var mx=r.maxScore===-999?'不封顶(扣分)':r.maxScore;
-    html+='<tr><td>'+r.l1+'</td><td>'+r.l2+'</td><td>'+r.weight+'</td><td>'+mx+'</td><td style="text-align:left;white-space:normal;max-width:300px">'+r.scoringRule+'</td></tr>';
-  });
-  html+='</tbody>';
-  document.getElementById('modelTable').innerHTML=html;
+  var h='<thead><tr><th>\u4e00\u7ea7\u6307\u6807</th><th>\u4e8c\u7ea7\u6307\u6807</th><th>\u4e8c\u7ea7\u6743\u91cd(%)</th><th>\u6ee1\u5206</th><th>\u8bc4\u5206\u6807\u51c6</th></tr></thead><tbody>';
+  STATIC_MODEL.forEach(function(r){var mx=r.maxScore===-999?'\u4e0d\u5c01\u9876(\u6263\u5206)':r.maxScore;h+='<tr><td>'+r.l1+'</td><td>'+r.l2+'</td><td>'+r.weight+'</td><td>'+mx+'</td><td style="text-align:left;white-space:normal;max-width:300px">'+r.scoringRule+'</td></tr>'});
+  h+='</tbody>';$('mTable').innerHTML=h;
 }
 
-// Auto login
-(async function(){
-  try{
-    var res=await sb.auth.getSession();
-    if(res.data.session)await loadApp();
-  }catch(e){}
-})();
+// Boot
+(async function(){try{var r=await sb.auth.getSession();if(r.data.session){await loadApp()}else{showAuth()}}catch(e){showAuth()}})();
 </script>
 </body>
 </html>
