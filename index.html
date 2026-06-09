@@ -3,518 +3,341 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KPI薪酬查询系统</title>
+<title>KPI\u85aa\u916c\u67e5\u8be2\u7cfb\u7edf</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; color: #fff; }
-.container { max-width: 800px; margin: 0 auto; padding: 20px; }
-
-/* Header */
-.header { text-align: center; padding: 30px 0 20px; }
-.header h1 { font-size: 24px; font-weight: 600; margin-bottom: 8px; }
-.header p { color: #8892b0; font-size: 14px; }
-
-/* Card */
-.card { background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 30px; margin-bottom: 20px; }
-
-/* Auth Form */
-.auth-form { max-width: 400px; margin: 0 auto; }
-.form-group { margin-bottom: 20px; }
-.form-group label { display: block; font-size: 14px; color: #8892b0; margin-bottom: 8px; }
-.form-group input { width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; color: #fff; font-size: 15px; outline: none; transition: border-color 0.3s; }
-.form-group input:focus { border-color: #4fc3f7; }
-.form-group input::placeholder { color: #5a6380; }
-
-.btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #4fc3f7, #0288d1); border: none; border-radius: 10px; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
-.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79,195,247,0.3); }
-.btn:active { transform: translateY(0); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-.btn-secondary { background: rgba(255,255,255,0.1); margin-top: 12px; }
-
-.switch-text { text-align: center; margin-top: 16px; font-size: 14px; color: #8892b0; }
-.switch-text a { color: #4fc3f7; text-decoration: none; cursor: pointer; }
-
-.error { color: #ff6b6b; font-size: 13px; text-align: center; margin-top: 10px; min-height: 20px; }
-
-/* Tabs */
-.tabs { display: flex; gap: 0; margin-bottom: 24px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
-.tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-size: 14px; transition: background 0.3s; border: none; background: transparent; color: #8892b0; }
-.tab.active { background: rgba(79,195,247,0.2); color: #4fc3f7; font-weight: 600; }
-
-/* KPI Display */
-.kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.kpi-name { font-size: 22px; font-weight: 700; }
-.kpi-badge { background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; font-size: 13px; }
-
-.kpi-score { text-align: center; padding: 24px 0; }
-.kpi-score .number { font-size: 56px; font-weight: 800; background: linear-gradient(135deg, #4fc3f7, #00e5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.kpi-score .label { font-size: 14px; color: #8892b0; margin-top: 4px; }
-.kpi-score .sub { font-size: 13px; color: #5a6380; margin-top: 8px; }
-
-.section { margin-bottom: 24px; }
-.section-title { font-size: 15px; font-weight: 600; color: #4fc3f7; margin-bottom: 12px; }
-
-.scores-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-.score-item { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 16px; }
-.score-item .name { font-size: 13px; color: #8892b0; margin-bottom: 6px; }
-.score-item .value { font-size: 20px; font-weight: 700; }
-
-.tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.tag { padding: 6px 14px; border-radius: 20px; font-size: 13px; }
-.tag-green { background: rgba(76,175,80,0.2); color: #66bb6a; }
-.tag-red { background: rgba(244,67,54,0.2); color: #ef5350; }
-
-.detail-table { width: 100%; font-size: 13px; }
-.detail-table th { text-align: left; color: #8892b0; font-weight: 400; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.detail-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.detail-table td:last-child { text-align: right; font-weight: 600; }
-
-.logout-btn { background: none; border: 1px solid rgba(255,255,255,0.2); color: #8892b0; padding: 6px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; }
-.logout-btn:hover { border-color: #ff6b6b; color: #ff6b6b; }
-
-.loading { text-align: center; padding: 40px; color: #8892b0; }
-.loading::after { content: ''; display: inline-block; width: 20px; height: 20px; border: 2px solid #8892b0; border-top-color: #4fc3f7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 10px; vertical-align: middle; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.hidden { display: none !important; }
-
-/* Auth tabs */
-.auth-tabs { display: flex; gap: 0; margin-bottom: 20px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; }
-.auth-tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 14px; transition: background 0.3s; border: none; background: transparent; color: #8892b0; }
-.auth-tab.active { background: rgba(79,195,247,0.2); color: #4fc3f7; font-weight: 600; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);min-height:100vh;color:#fff}
+.container{max-width:800px;margin:0 auto;padding:20px}
+.header{text-align:center;padding:30px 0 20px}
+.header h1{font-size:24px;font-weight:600;margin-bottom:8px}
+.header p{color:#8892b0;font-size:14px}
+.card{background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:30px;margin-bottom:20px}
+.auth-form{max-width:400px;margin:0 auto}
+.form-group{margin-bottom:20px}
+.form-group label{display:block;font-size:14px;color:#8892b0;margin-bottom:8px}
+.form-group input{width:100%;padding:12px 16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:#fff;font-size:15px;outline:none;transition:border-color .3s}
+.form-group input:focus{border-color:#4fc3f7}
+.form-group input::placeholder{color:#5a6380}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,#4fc3f7,#0288d1);border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(79,195,247,.3)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.error{color:#ff6b6b;font-size:13px;text-align:center;margin-top:10px;min-height:20px}
+.success{color:#66bb6a;font-size:13px;text-align:center;margin-top:10px}
+.auth-tabs,.tabs{display:flex;background:rgba(255,255,255,.05);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.auth-tab,.tab{flex:1;padding:12px 10px;text-align:center;cursor:pointer;font-size:14px;border:none;background:0 0;color:#8892b0;transition:background .3s}
+.auth-tab.active,.tab.active{background:rgba(79,195,247,.2);color:#4fc3f7;font-weight:600}
+.kpi-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.kpi-name{font-size:22px;font-weight:700}
+.kpi-badge{background:rgba(255,255,255,.15);padding:4px 12px;border-radius:20px;font-size:13px}
+.kpi-score{text-align:center;padding:24px 0}
+.kpi-score .number{font-size:56px;font-weight:800;background:linear-gradient(135deg,#4fc3f7,#00e5ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.kpi-score .label{font-size:14px;color:#8892b0;margin-top:4px}
+.kpi-score .sub{font-size:13px;color:#5a6380;margin-top:8px}
+.section{margin-bottom:24px}
+.section-title{font-size:15px;font-weight:600;color:#4fc3f7;margin-bottom:12px}
+.scores-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.score-item{background:rgba(255,255,255,.05);border-radius:10px;padding:16px}
+.score-item .name{font-size:13px;color:#8892b0;margin-bottom:6px}
+.score-item .value{font-size:20px;font-weight:700}
+.tag-row{display:flex;gap:8px;flex-wrap:wrap}
+.tag{padding:6px 14px;border-radius:20px;font-size:13px}
+.tag-green{background:rgba(76,175,80,.2);color:#66bb6a}
+.tag-red{background:rgba(244,67,54,.2);color:#ef5350}
+.detail-table{width:100%;font-size:13px;border-collapse:collapse}
+.detail-table th{text-align:left;color:#8892b0;font-weight:400;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
+.detail-table td{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.05)}
+.detail-table td:last-child{text-align:right;font-weight:600}
+.logout-btn{background:0 0;border:1px solid rgba(255,255,255,.2);color:#8892b0;padding:6px 16px;border-radius:8px;font-size:13px;cursor:pointer}
+.logout-btn:hover{border-color:#ff6b6b;color:#ff6b6b}
+.top-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px}
+.hidden{display:none!important}
+.debug{position:fixed;bottom:10px;left:10px;right:10px;background:rgba(0,0,0,.8);color:#0f0;font-size:11px;padding:10px;border-radius:8px;max-height:200px;overflow:auto;z-index:999;word-break:break-all}
 </style>
 </head>
 <body>
 <div class="container">
   <div class="header">
-    <h1>KPI薪酬查询系统</h1>
-    <p>中国电信乐山分公司 · 网格经理</p>
+    <h1>KPI\u85aa\u916c\u67e5\u8be2\u7cfb\u7edf</h1>
+    <p>\u4e2d\u56fd\u7535\u4fe1\u4e50\u5c71\u5206\u516c\u53f8 \u00b7 \u7f51\u683c\u7ecf\u7406</p>
   </div>
-
-  <!-- Auth View -->
   <div id="authView">
     <div class="card">
       <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchAuthTab('login')">登录</button>
-        <button class="auth-tab" onclick="switchAuthTab('register')">注册</button>
+        <button class="auth-tab active" onclick="switchAuth('login',this)">登录</button>
+        <button class="auth-tab" onclick="switchAuth('register',this)">注册</button>
       </div>
-
-      <div class="auth-form">
-        <div id="loginForm">
-          <div class="form-group">
-            <label>工号</label>
-            <input type="text" id="loginEmpId" placeholder="请输入工号">
-          </div>
-          <div class="form-group">
-            <label>密码</label>
-            <input type="password" id="loginPassword" placeholder="请输入密码">
-          </div>
-          <button class="btn" onclick="doLogin()">登录查询</button>
-          <div class="error" id="loginError"></div>
-        </div>
-
-        <div id="registerForm" class="hidden">
-          <div class="form-group">
-            <label>工号</label>
-            <input type="text" id="regEmpId" placeholder="请输入工号">
-          </div>
-          <div class="form-group">
-            <label>姓名</label>
-            <input type="text" id="regEmpName" placeholder="请输入姓名（需与系统一致）">
-          </div>
-          <div class="form-group">
-            <label>密码</label>
-            <input type="password" id="regPassword" placeholder="设置登录密码（至少6位）">
-          </div>
-          <button class="btn" onclick="doRegister()">注册账号</button>
-          <div class="error" id="regError"></div>
-        </div>
+      <div class="auth-form" id="loginForm">
+        <div class="form-group"><label>工号</label><input id="lId" placeholder="请输入工号"></div>
+        <div class="form-group"><label>密码</label><input id="lPwd" type="password" placeholder="请输入密码"></div>
+        <button class="btn" onclick="login()">登录查询</button>
+        <div class="error" id="lErr"></div>
+      </div>
+      <div class="auth-form hidden" id="regForm">
+        <div class="form-group"><label>工号</label><input id="rId" placeholder="请输入工号"></div>
+        <div class="form-group"><label>姓名</label><input id="rName" placeholder="请输入姓名（需与系统一致）"></div>
+        <div class="form-group"><label>密码</label><input id="rPwd" type="password" placeholder="设置密码（至少6位）"></div>
+        <button class="btn" onclick="register()">注册账号</button>
+        <div class="error" id="rErr"></div>
       </div>
     </div>
   </div>
-
-  <!-- KPI View -->
-  <div id="kpiView" class="hidden">
-    <div class="card" style="text-align:right; padding: 12px 20px;">
-      <span id="welcomeText" style="float:left; font-size:14px; color:#8892b0;"></span>
-      <button class="logout-btn" onclick="doLogout()">退出登录</button>
-    </div>
-
-    <div class="card">
-      <div class="kpi-header">
-        <div>
-          <div class="kpi-name" id="empName">-</div>
-          <div style="font-size:13px; color:#8892b0; margin-top:4px;">
-            <span id="empDistrict">-</span> · <span id="empStar">-</span>
-          </div>
-        </div>
-        <div class="kpi-badge" id="empRank">排名 -</div>
-      </div>
-
-      <div class="kpi-score">
-        <div class="number" id="kpiTotal">-</div>
-        <div class="label">KPI总得分</div>
-        <div class="sub" id="kpiDeviation">-</div>
-      </div>
-
-      <div class="tabs">
-        <button class="tab active" onclick="switchTab('scores')">维度得分</button>
-        <button class="tab" onclick="switchTab('details')">业务明细</button>
-        <button class="tab" onclick="switchTab('compare')">团队对比</button>
-      </div>
-
-      <div id="tabScores">
-        <div class="section">
-          <div class="section-title">五大维度得分</div>
-          <div class="scores-grid" id="scoresGrid"></div>
-        </div>
-        <div class="section">
-          <div class="section-title">优势与短板</div>
-          <div class="tag-row" id="tagsRow"></div>
-        </div>
-      </div>
-
-      <div id="tabDetails" class="hidden">
-        <div class="section">
-          <div class="section-title">重点业务明细</div>
-          <table class="detail-table" id="detailBizTable"></table>
-        </div>
-        <div class="section">
-          <div class="section-title">规定动作明细</div>
-          <table class="detail-table" id="detailReqTable"></table>
-        </div>
-        <div class="section">
-          <div class="section-title">加扣分明细</div>
-          <table class="detail-table" id="detailBonusTable"></table>
-        </div>
-      </div>
-
-      <div id="tabCompare" class="hidden">
-        <div class="section">
-          <div class="section-title">与团队平均值对比</div>
-          <div class="scores-grid" id="compareGrid"></div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div id="kpiView" class="hidden"></div>
 </div>
+<div class="debug" id="dbg"></div>
 
 <script>
-const SUPABASE_URL = 'https://fqrlmdqnoaxtqwvxmedo.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxcmxtZHFub2F4dHF3dnhtZWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5Njk4ODIsImV4cCI6MjA5NjU0NTg4Mn0.V_gds7P0YIf3SJ3ikWjM4HcSXkjIuBy9WDvUxge2rso';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SB_URL='https://fqrlmdqnoaxtqwvxmedo.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxcmxtZHFub2F4dHF3dnhtZWRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5Njk4ODIsImV4cCI6MjA5NjU0NTg4Mn0.V_gds7P0YIf3SJ3ikWjM4HcSXkjIuBy9WDvUxge2rso';
+let sb;
+try{sb=supabase.createClient(SB_URL,SB_KEY);dbg('Supabase client OK')}catch(e){dbg('Client error: '+e.message)}
 
-let currentUser = null;
-
-function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach((t, i) => {
-    t.classList.toggle('active', (tab === 'login' ? i === 0 : i === 1));
-  });
-  document.getElementById('loginForm').classList.toggle('hidden', tab !== 'login');
-  document.getElementById('registerForm').classList.toggle('hidden', tab !== 'register');
-  document.getElementById('loginError').textContent = '';
-  document.getElementById('regError').textContent = '';
+function dbg(m){document.getElementById('dbg').innerHTML+='<div>'+m+'</div>';console.log(m)}
+function switchAuth(t,el){
+  document.querySelectorAll('.auth-tab').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('loginForm').classList.toggle('hidden',t!=='login');
+  document.getElementById('regForm').classList.toggle('hidden',t!=='register');
+  document.getElementById('lErr').textContent='';
+  document.getElementById('rErr').textContent='';
 }
 
-function switchTab(tab) {
-  document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tabScores').classList.add('hidden');
-  document.getElementById('tabDetails').classList.add('hidden');
-  document.getElementById('tabCompare').classList.add('hidden');
-
-  const tabs = document.querySelectorAll('.tabs .tab');
-  if (tab === 'scores') { tabs[0].classList.add('active'); document.getElementById('tabScores').classList.remove('hidden'); }
-  if (tab === 'details') { tabs[1].classList.add('active'); document.getElementById('tabDetails').classList.remove('hidden'); }
-  if (tab === 'compare') { tabs[2].classList.add('active'); document.getElementById('tabCompare').classList.remove('hidden'); }
-}
-
-async function doRegister() {
-  const empId = document.getElementById('regEmpId').value.trim();
-  const empName = document.getElementById('regEmpName').value.trim();
-  const password = document.getElementById('regPassword').value;
-  const errEl = document.getElementById('regError');
-  errEl.textContent = '';
-
-  if (!empId || !empName || !password) { errEl.textContent = '请填写所有字段'; return; }
-  if (password.length < 6) { errEl.textContent = '密码至少6位'; return; }
-
-  // Verify employee exists in system
-  const { data: checkData, error: checkErr } = await sb.rpc('check_employee', { eid: empId, ename: empName });
-  if (checkErr || !checkData) {
-    errEl.textContent = '工号或姓名与系统记录不匹配，请确认后重试';
-    return;
-  }
-
-  // Register with Supabase Auth (email = emp_id + dummy domain)
-  const email = empId + '@kpi.telecom.local';
-  const { data, error } = await sb.auth.signUp({
-    email: email,
-    password: password,
-    options: {
-      data: { emp_id: empId, emp_name: empName }
+async function register(){
+  const eid=document.getElementById('rId').value.trim();
+  const ename=document.getElementById('rName').value.trim();
+  const pwd=document.getElementById('rPwd').value;
+  const err=document.getElementById('rErr');
+  err.textContent='';
+  if(!eid||!ename||!pwd){err.textContent='请填写所有字段';return}
+  if(pwd.length<6){err.textContent='密码至少6位';return}
+  try{
+    dbg('Checking employee: '+eid+' / '+ename);
+    const{data:ok,error:ce}=await sb.rpc('check_employee',{eid:eid,ename:ename});
+    dbg('check_employee result: '+(ok)+' err:'+JSON.stringify(ce));
+    if(ce||!ok){err.textContent='工号或姓名与系统记录不匹配';return}
+    const email=eid+'@kpi.local';
+    dbg('Signing up: '+email);
+    const{data,error}=await sb.auth.signUp({email,password:pwd,options:{data:{emp_id:eid,emp_name:ename}}});
+    if(error){
+      dbg('SignUp error: '+error.message);
+      if(error.message.includes('already'))err.textContent='该工号已注册，请直接登录';
+      else err.textContent=error.message;
+      return;
     }
-  });
-
-  if (error) {
-    if (error.message.includes('already registered')) {
-      errEl.textContent = '该工号已注册，请直接登录';
-    } else {
-      errEl.textContent = error.message;
-    }
-    return;
-  }
-
-  errEl.textContent = '';
-  errEl.style.color = '#66bb6a';
-  errEl.textContent = '注册成功！请切换到登录页面登录';
-  setTimeout(() => { errEl.style.color = ''; }, 3000);
+    dbg('SignUp success');
+    err.className='success';err.textContent='注册成功！请切换到登录页面';
+  }catch(e){dbg('Register exception: '+e.message);err.textContent='注册失败: '+e.message}
 }
 
-async function doLogin() {
-  const empId = document.getElementById('loginEmpId').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const errEl = document.getElementById('loginError');
-  errEl.textContent = '';
-
-  if (!empId || !password) { errEl.textContent = '请输入工号和密码'; return; }
-
-  const email = empId + '@kpi.telecom.local';
-
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
-
-  if (error) {
-    errEl.textContent = '工号或密码错误';
-    return;
-  }
-
-  currentUser = data.user;
-  await showKPI();
+async function login(){
+  const eid=document.getElementById('lId').value.trim();
+  const pwd=document.getElementById('lPwd').value;
+  const err=document.getElementById('lErr');
+  err.textContent='';
+  if(!eid||!pwd){err.textContent='请输入工号和密码';return}
+  try{
+    const email=eid+'@kpi.local';
+    dbg('Signing in: '+email);
+    const{data,error}=await sb.auth.signInWithPassword({email,password:pwd});
+    if(error){dbg('Login error: '+error.message);err.textContent='工号或密码错误';return}
+    dbg('Login success, uid='+data.user.id);
+    await loadKPI();
+  }catch(e){dbg('Login exception: '+e.message);err.textContent='登录失败: '+e.message}
 }
 
-async function doLogout() {
+async function doLogout(){
   await sb.auth.signOut();
-  currentUser = null;
   document.getElementById('authView').classList.remove('hidden');
   document.getElementById('kpiView').classList.add('hidden');
-  document.getElementById('loginPassword').value = '';
-  document.getElementById('loginError').textContent = '';
+  document.getElementById('lPwd').value='';
 }
 
-async function showKPI() {
+async function loadKPI(){
+  const kv=document.getElementById('kpiView');
+  kv.classList.remove('hidden');
   document.getElementById('authView').classList.add('hidden');
-  document.getElementById('kpiView').classList.remove('hidden');
-  document.getElementById('kpiView').innerHTML = '<div class="loading">加载KPI数据中</div>';
+  kv.innerHTML='<div class="card"><div style="text-align:center;padding:40px;color:#8892b0">加载KPI数据中...</div></div>';
 
-  // Query KPI data for this user
-  // RLS ensures only own data is returned
-  const { data: profile } = await sb.from('profiles').select('emp_id, emp_name').single();
+  try{
+    // Step 1: Get profile
+    dbg('Querying profiles...');
+    const{data:prof,error:pe}=await sb.from('profiles').select('*').single();
+    dbg('Profile: '+JSON.stringify(prof)+' err: '+JSON.stringify(pe));
+    if(!prof){dbg('No profile found, logging out');doLogout();return}
 
-  if (!profile) {
-    doLogout();
-    return;
+    // Step 2: Get KPI data
+    // We need to find the correct column name for 工号
+    // Try querying without filter first to see columns (RLS should limit to own row)
+    dbg('Querying kpi_data...');
+    const{data:kpiData,error:ke}=await sb.from('kpi_data').select('*');
+    dbg('KPI data: '+(kpiData?kpiData.length+' rows':'null')+' err: '+JSON.stringify(ke));
+
+    if(ke||!kpiData||kpiData.length===0){
+      kv.innerHTML='<div class="card"><div class="error" style="padding:40px">未找到KPI数据 (error: '+JSON.stringify(ke)+')</div></div>';
+      return;
+    }
+
+    const d=kpiData[0];
+    const keys=Object.keys(d);
+    dbg('KPI keys: '+JSON.stringify(keys));
+
+    // Render
+    render(d,keys,prof);
+
+  }catch(e){
+    dbg('loadKPI exception: '+e.message+' '+e.stack);
+    kv.innerHTML='<div class="card"><div class="error" style="padding:40px">加载失败: '+e.message+'</div></div>';
   }
-
-  document.getElementById('welcomeText').textContent = profile.emp_name;
-
-  // Get KPI data (RLS will filter to own data)
-  const { data: kpi, error } = await sb.from('kpi_data').select('*').eq('工号', profile.emp_id).single();
-
-  if (error || !kpi) {
-    document.getElementById('kpiView').innerHTML = '<div class="card"><div class="error" style="padding:40px;">未找到KPI数据，请联系管理员</div></div>';
-    return;
-  }
-
-  // Render KPI
-  renderKPI(kpi);
 }
 
-function renderKPI(d) {
-  // Get all keys dynamically
-  const keys = Object.keys(d);
+function render(d,keys,prof){
+  const kv=document.getElementById('kpiView');
+  const cols=keys.filter(k=>k!=='id'&&k!=='created_at');
 
-  // Find key mappings by searching substrings
-  function findKey(substrings) {
-    return keys.find(k => substrings.every(s => k.includes(s)));
-  }
-
-  // Try to find column names by their content patterns
-  // The column names are in Chinese, we need to match them
-  // Since we can't hardcode Chinese here reliably, we'll detect them from data
-
-  // Helper: get value from record
-  const getVal = (k) => d[k];
-
-  // Identify columns by their position and data characteristics
-  // Column 0 (after id): 工号
-  // Column 1: 姓名
-  // Column 2: 星级
-  // Column 3: 区县
-  // Column 4: some status field
-  // Then score fields...
-  // Last 2: 优势维度, 短板维度
-
-  const colKeys = keys.filter(k => k !== 'id' && k !== 'created_at');
-
-  // Basic info
-  const empId = d[colKeys[0]];
-  const empName = d[colKeys[1]];
-  const starLevel = d[colKeys[2]];
-  const district = d[colKeys[3]];
-
-  // Find score fields (numeric values that look like scores)
-  const scoreFields = {};
-  const detailFields = {};
-  const teamAvgFields = {};
-
-  colKeys.forEach(k => {
-    const v = d[k];
-    if (v === null || v === undefined) return;
-
-    // Skip known non-score fields
-    if (k === colKeys[0] || k === colKeys[1] || k === colKeys[2] || k === colKeys[3]) return;
-
-    if (typeof v === 'number') {
-      if (k.includes('\u56e2\u961f\u503c') || k.includes('\u5e73\u5747') || k.includes('\u6807\u51c6\u5dee') || k.includes('\u6700\u9ad8\u5206')) {
-        teamAvgFields[k] = v;
-      } else {
-        scoreFields[k] = v;
-      }
-    } else if (typeof v === 'string' && (v.startsWith('[') || v.startsWith('{'))) {
-      try { detailFields[k] = JSON.parse(v); } catch(e) {}
-    }
-  });
-
-  // Build HTML
-  let html = '';
+  // Identify columns by position (known from data structure)
+  // cols[0]=工号, cols[1]=姓名, cols[2]=星级, cols[3]=区县, cols[4]=业务状态
+  // Then score fields, then team avg fields, then array fields (优势,短板)
+  let html='';
 
   // Top bar
-  html += '<div class="card" style="text-align:right; padding: 12px 20px;">';
-  html += '<span id="welcomeText" style="float:left; font-size:14px; color:#8892b0;">' + empName + '</span>';
-  html += '<button class="logout-btn" onclick="doLogout()">退出登录</button>';
-  html += '</div>';
+  html+='<div class="card top-bar"><span style="font-size:14px;color:#8892b0">'+prof.emp_name+'</span>';
+  html+='<button class="logout-btn" onclick="doLogout()">退出登录</button></div>';
 
   // Main card
-  html += '<div class="card">';
-  html += '<div class="kpi-header"><div>';
-  html += '<div class="kpi-name">' + empName + '</div>';
-  html += '<div style="font-size:13px; color:#8892b0; margin-top:4px;">' + district + ' · ' + starLevel + '</div>';
-  html += '</div>';
+  html+='<div class="card">';
 
-  // Find ranking
-  const rankKey = colKeys.find(k => {
-    const v = d[k];
-    return typeof v === 'number' && v === Math.floor(v) && v >= 1 && v <= 37;
-  });
-  html += '<div class="kpi-badge">' + (rankKey ? '第' + d[rankKey] + '名' : '') + '</div>';
-  html += '</div>';
+  // Name and rank
+  const empName=d[cols[1]]||'-';
+  const star=d[cols[2]]||'-';
+  const district=d[cols[3]]||'-';
 
-  // KPI total score - find the field with largest number
-  let kpiTotal = 0;
-  let kpiTotalKey = '';
-  Object.entries(scoreFields).forEach(([k, v]) => {
-    if (v > kpiTotal) { kpiTotal = v; kpiTotalKey = k; }
-  });
-  // Remove kpiTotal from scoreFields for display
-  delete scoreFields[kpiTotalKey];
+  // Find ranking (integer between 1-37)
+  let rankVal=null;
+  cols.forEach(k=>{const v=d[k];if(typeof v==='number'&&v>=1&&v<=37&&v===Math.floor(v))rankVal=v});
 
-  html += '<div class="kpi-score">';
-  html += '<div class="number">' + kpiTotal.toFixed(2) + '</div>';
-  html += '<div class="label">KPI总得分</div>';
+  html+='<div class="kpi-header"><div>';
+  html+='<div class="kpi-name">'+empName+'</div>';
+  html+='<div style="font-size:13px;color:#8892b0;margin-top:4px">'+district+' \u00b7 '+star+'</div>';
+  html+='</div>';
+  html+='<div class="kpi-badge">'+(rankVal?'第'+rankVal+'名':'')+'</div></div>';
 
-  // Find deviation field
-  const devKey = Object.keys(d).find(k => typeof d[k] === 'number' && d[k] > 0 && d[k] < 100 && (k.includes('\u504f\u5dee') || k.includes('\u4e0a\u6d6e')));
-  html += '<div class="sub">' + (devKey ? '距上线偏差: ' + d[devKey] : '') + '</div>';
-  html += '</div>';
-
-  // Tabs
-  html += '<div class="tabs">';
-  html += '<button class="tab active" onclick="switchTab(\'scores\')">维度得分</button>';
-  html += '<button class="tab" onclick="switchTab(\'details\')">业务明细</button>';
-  html += '<button class="tab" onclick="switchTab(\'compare\')">团队对比</button>';
-  html += '</div>';
-
-  // Tab 1: Scores
-  html += '<div id="tabScores">';
-  html += '<div class="section"><div class="section-title">得分明细</div>';
-  html += '<div class="scores-grid">';
-  Object.entries(scoreFields).forEach(([k, v]) => {
-    const displayName = k.replace(/_\u5f97\u5206$/, '');
-    const teamAvg = teamAvgFields[k + '\u56e2\u961f\u503c'] || teamAvgFields[k.replace('\u5f97\u5206', '\u56e2\u961f\u503c')];
-    const isAbove = teamAvg ? v >= teamAvg : true;
-    html += '<div class="score-item">';
-    html += '<div class="name">' + displayName + (teamAvg ? ' <span style="color:#5a6380">(均' + teamAvg + ')</span>' : '') + '</div>';
-    html += '<div class="value" style="color:' + (isAbove ? '#66bb6a' : '#ef5350') + '">' + v + '</div>';
-    html += '</div>';
-  });
-  html += '</div></div>';
-
-  // Tags (优势/短板) - find array fields
-  const advantageKey = colKeys.find(k => Array.isArray(d[k]) && d[k].length > 0);
-  const weaknessKey = colKeys.filter(k => Array.isArray(d[k]) && d[k].length > 0);
-  if (weaknessKey.length > 0) {
-    html += '<div class="section"><div class="section-title">优势与短板</div><div class="tag-row">';
-    weaknessKey.forEach((k, i) => {
-      d[k].forEach(tag => {
-        const cls = i === 0 ? 'tag-green' : 'tag-red';
-        const label = i === 0 ? '优势: ' : '短板: ';
-        html += '<span class="tag ' + cls + '">' + label + tag + '</span>';
-      });
-    });
-    html += '</div></div>';
-  }
-
-  html += '</div>';
-
-  // Tab 2: Details
-  html += '<div id="tabDetails" class="hidden">';
-  Object.entries(detailFields).forEach(([sectionName, items]) => {
-    if (typeof items === 'object' && !Array.isArray(items)) {
-      html += '<div class="section"><div class="section-title">' + sectionName + '</div>';
-      html += '<table class="detail-table"><thead><tr><th>指标</th><th>得分</th></tr></thead><tbody>';
-      Object.entries(items).forEach(([name, val]) => {
-        html += '<tr><td>' + name + '</td><td>' + val + '</td></tr>';
-      });
-      html += '</tbody></table></div>';
+  // Find KPI total (largest number)
+  let scores={},teamAvgs={},rankField=null;
+  cols.forEach((k,i)=>{
+    if(i<4)return; // skip first 4 columns
+    const v=d[k];
+    if(v===null||v===undefined)return;
+    if(typeof v==='number'){
+      // Check if it's a team average field
+      if(k.indexOf('\u56e2\u961f\u503c')!==-1||k.indexOf('\u6807\u51c6\u5dee')!==-1||k.indexOf('\u6700\u9ad8\u5206')!==-1){
+        teamAvgs[k]=v;
+      }else{
+        scores[k]=v;
+      }
     }
   });
-  html += '</div>';
 
-  // Tab 3: Compare
-  html += '<div id="tabCompare" class="hidden">';
-  html += '<div class="section"><div class="section-title">与团队平均值对比</div>';
-  html += '<div class="scores-grid">';
-  Object.entries(teamAvgFields).forEach(([k, avg]) => {
-    const myKey = k.replace('\u56e2\u961f\u503c', '\u5f97\u5206');
-    const myVal = d[myKey] || 0;
-    const pct = avg > 0 ? ((myVal - avg) / avg * 100).toFixed(1) : 0;
-    const color = pct >= 0 ? '#66bb6a' : '#ef5350';
-    const name = k.replace('\u56e2\u961f\u503c', '').replace(/_\u5f97\u5206$/, '');
-    html += '<div class="score-item">';
-    html += '<div class="name">' + name + '</div>';
-    html += '<div class="value" style="color:' + color + '">' + myVal + ' <span style="font-size:13px;">(' + (pct >= 0 ? '+' : '') + pct + '%)</span></div>';
-    html += '<div class="name" style="margin-top:4px;">团队均值: ' + avg + '</div>';
-    html += '</div>';
+  // KPI total = max score
+  let kpiTotal=0,kpiKey='';
+  Object.entries(scores).forEach(([k,v])=>{if(v>kpiTotal){kpiTotal=v;kpiKey=k}});
+  delete scores[kpiKey];
+
+  // Find deviation
+  let devKey=null;
+  Object.keys(scores).forEach(k=>{const v=d[k];if(typeof v==='number'&&v>0&&v<100)devKey=k});
+
+  html+='<div class="kpi-score">';
+  html+='<div class="number">'+kpiTotal.toFixed(2)+'</div>';
+  html+='<div class="label">KPI\u603b\u5f97\u5206</div>';
+  if(devKey)html+='<div class="sub">\u8ddd\u4e0a\u7ebf\u504f\u5dee: '+d[devKey]+'</div>';
+  html+='</div>';
+
+  // Tabs
+  html+='<div class="tabs">';
+  html+='<button class="tab active" onclick="swTab(0)">维度得分</button>';
+  html+='<button class="tab" onclick="swTab(1)">业务明细</button>';
+  html+='<button class="tab" onclick="swTab(2)">团队对比</button>';
+  html+='</div>';
+
+  // Tab 0: Scores
+  html+='<div id="t0">';
+  html+='<div class="section"><div class="section-title">得分明细</div><div class="scores-grid">';
+  Object.entries(scores).forEach(([k,v])=>{
+    const avg=teamAvgs[k+'\u56e2\u961f\u503c']||null;
+    const above=avg?v>=avg:true;
+    html+='<div class="score-item">';
+    html+='<div class="name">'+k.replace(/_\u5f97\u5206$/,'')+(avg?' <span style="color:#5a6380">(\u5747'+avg+')</span>':'')+'</div>';
+    html+='<div class="value" style="color:'+(above?'#66bb6a':'#ef5350')+'">'+v+'</div>';
+    html+='</div>';
   });
-  html += '</div></div>';
-  html += '</div>';
+  html+='</div></div>';
 
-  html += '</div>';
-
-  document.getElementById('kpiView').innerHTML = html;
-}
-
-// Auto-login check on page load
-async function init() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await showKPI();
+  // Tags
+  const tagKeys=cols.filter(k=>Array.isArray(d[k])&&d[k].length>0);
+  if(tagKeys.length>0){
+    html+='<div class="section"><div class="section-title">\u4f18\u52bf\u4e0e\u77ed\u677f</div><div class="tag-row">';
+    tagKeys.forEach((k,i)=>{
+      const cls=i===0?'tag-green':'tag-red';
+      const lbl=i===0?'\u4f18\u52bf: ':'\u77ed\u677f: ';
+      d[k].forEach(t=>{html+='<span class="tag '+cls+'">'+lbl+t+'</span>'});
+    });
+    html+='</div></div>';
   }
+  html+='</div>';
+
+  // Tab 1: Details
+  html+='<div id="t1" class="hidden">';
+  cols.forEach(k=>{
+    const v=d[k];
+    if(typeof v==='string'&&(v[0]==='['||v[0]==='{')){
+      try{
+        const obj=JSON.parse(v);
+        if(typeof obj==='object'&&!Array.isArray(obj)){
+          html+='<div class="section"><div class="section-title">'+k+'</div>';
+          html+='<table class="detail-table"><thead><tr><th>指标</th><th>得分</th></tr></thead><tbody>';
+          Object.entries(obj).forEach(([n,val])=>{html+='<tr><td>'+n+'</td><td>'+val+'</td></tr>'});
+          html+='</tbody></table></div>';
+        }
+      }catch(e){}
+    }
+  });
+  html+='</div>';
+
+  // Tab 2: Compare
+  html+='<div id="t2" class="hidden">';
+  html+='<div class="section"><div class="section-title">\u4e0e\u56e2\u961f\u5e73\u5747\u503c\u5bf9\u6bd4</div><div class="scores-grid">';
+  Object.entries(teamAvgs).forEach(([k,avg])=>{
+    const myKey=k.replace('\u56e2\u961f\u503c','\u5f97\u5206');
+    const myVal=d[myKey]||0;
+    const pct=avg>0?((myVal-avg)/avg*100).toFixed(1):0;
+    const color=pct>=0?'#66bb6a':'#ef5350';
+    const name=k.replace('\u56e2\u961f\u503c','').replace(/_\u5f97\u5206$/,'');
+    html+='<div class="score-item">';
+    html+='<div class="name">'+name+'</div>';
+    html+='<div class="value" style="color:'+color+'">'+myVal+' <span style="font-size:13px">('+(pct>=0?'+':'')+pct+'%)</span></div>';
+    html+='<div class="name" style="margin-top:4px">\u56e2\u961f\u5747\u503c: '+avg+'</div>';
+    html+='</div>';
+  });
+  html+='</div></div>';
+
+  html+='</div>';
+  kv.innerHTML=html;
 }
 
-init();
+function swTab(i){
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tabs .tab')[i].classList.add('active');
+  for(let j=0;j<3;j++)document.getElementById('t'+j).classList.toggle('hidden',j!==i);
+}
+
+// Auto login check
+(async()=>{
+  try{
+    const{data:{session}}=await sb.auth.getSession();
+    if(session){dbg('Auto-login: '+session.user.id);await loadKPI()}
+    else dbg('No session');
+  }catch(e){dbg('Init error: '+e.message)}
+})();
 </script>
 </body>
 </html>
