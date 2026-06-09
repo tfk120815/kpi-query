@@ -84,7 +84,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;b
   </div>
   <div id="kpiView" class="hidden"></div>
 </div>
-<!-- debug hidden
+<!-- debug panel (hidden)
 <div class="debug" id="dbg"></div>
 -->
 
@@ -141,7 +141,7 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 let sb;
 try { sb = supabase.createClient(SB_URL, SB_KEY); dbg('Supabase client OK'); } catch(e) { dbg('Client error: ' + e.message); }
 
-function dbg(m) { document.getElementById('dbg').innerHTML += m + '\n'; console.log(m); }
+function dbg(m) { var el = document.getElementById('dbg'); if (el) el.textContent += m + '\n'; console.log(m); }
 
 function switchAuth(t, el) {
   document.querySelectorAll('.auth-tab').forEach(e => e.classList.remove('active'));
